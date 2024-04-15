@@ -1,6 +1,6 @@
 ![《opencv算法精解》全书笔记](https://picx.zhimg.com/70/v2-b48669c57de9e5fb054f638e2d553726_1440w.image?source=172ae18b&biz_tag=Post)
 
-![](E:\typora\Project\OpenCV4.assets\2.jpg)
+![](OpenCV4.assets\2.jpg)
 
 # 二、图像数字化
 
@@ -875,15 +875,15 @@ Mat sobel(Mat image, int x_flag, int y_flag, int winSize, int borderType)
 
 ​																					垂直方向上：
 
-![image-20231218141101462](E:\typora\Project\OpenCV4.assets\image-20231218141101462.png)
+![image-20231218141101462](OpenCV4.assets\image-20231218141101462.png)
 
 ​																				   水平方向上：
 
-![image-20231218141200119](E:\typora\Project\OpenCV4.assets\image-20231218141200119.png)
+![image-20231218141200119](OpenCV4.assets\image-20231218141200119.png)
 
 ​																						边缘图：
 
-![image-20231218141237393](E:\typora\Project\OpenCV4.assets\image-20231218141237393.png)
+![image-20231218141237393](OpenCV4.assets\image-20231218141237393.png)
 
 ## 8.4 Scharr算子
 
@@ -922,63 +922,24 @@ $$
 
 垂直方向上的边缘：
 
-![image-20231218143700328](E:\typora\Project\OpenCV4.assets\image-20231218143700328.png)
+![image-20231218143700328](OpenCV4.assets\image-20231218143700328.png)
 
 水平方向上的边缘：
 
-![image-20231218143716137](E:\typora\Project\OpenCV4.assets\image-20231218143716137.png)
+![image-20231218143716137](OpenCV4.assets\image-20231218143716137.png)
 
 边缘强度：
 
-![image-20231218143738586](E:\typora\Project\OpenCV4.assets\image-20231218143738586.png)
+![image-20231218143738586](OpenCV4.assets\image-20231218143738586.png)
 
 ## 8.5 kirsch和Robinson算子
 
 ### 8.5.1原理详解
 
 ​		1.Kirsh算子由以下8个卷积核组成
-$$
-k_1=\left[\begin{matrix}
-5&5&5\\
--3&0&-3\\
--3&-3&-3
-\end{matrix}\right]\ 
-k_2=\left[\begin{matrix}
--3&-3&-3\\
--3&0&-3\\
-5&5&5
-\end{matrix}\right]\
-k_3=\left[\begin{matrix}
--3&5&5\\
--3&0&5\\
--3&-3&-3
-\end{matrix}\right]\
-k_4=\left[\begin{matrix}
--3&-3&-3\\
-5&0&-3\\
-5&5&-3
-\end{matrix}\right]\\\\
-k_5=\left[\begin{matrix}
--3&-3&5\\
--3&0&5\\
--3&-3&5
-\end{matrix}\right]\
-k_6=\left[\begin{matrix}
-5&-3&-3\\
-5&0&-3\\
-5&-3&-3
-\end{matrix}\right]\  
-k_7=\left[\begin{matrix}
--3&-3&-3\\
--3&0&5\\
--3&5&5
-\end{matrix}\right]\
-k_8=\left[\begin{matrix}
-5&5&-3\\
-5&0&-3\\
--3&-3&-3
-\end{matrix}\right]\\\\
-$$
+
+![image-20240415235603127](OpenCV4.assets/image-20240415235603127.png)
+
 ​		图像与每一个核进行卷积，然后取绝对值作为对应方向上的边缘强度的量化。对8个卷积结果取绝对值，然后再对应位置值取最大值作为最后输出的边缘强度。
 
 ​		2.Robinson边缘算子
@@ -1056,7 +1017,7 @@ Mat krisch(InputArray src, int borderType = BORDER_DEFAULT)
 
 ### 8.5.3 处理结果
 
-![image-20231218160034325](E:\typora\Project\OpenCV4.assets\image-20231218160034325.png)
+![image-20231218160034325](OpenCV4.assets\image-20231218160034325.png)
 
 ## 8.6 Canny边缘检测
 
@@ -1114,15 +1075,15 @@ Mat krisch(InputArray src, int borderType = BORDER_DEFAULT)
 
 ​											边缘强度的灰度级显示           	                        非极大值抑制
 
-<center class="half">    <img src="E:\typora\Project\OpenCV4.assets\image-20231218173919975.png" width="300"/>    <img src="E:\typora\Project\OpenCV4.assets\image-20231218173950041.png" width="300"/> </center>
+<center class="half">    <img src="OpenCV4.assets\image-20231218173919975.png" width="300"/>    <img src="OpenCV4.assets\image-20231218173950041.png" width="300"/> </center>
 
 ​												Canny边缘                                               低阈值处理后的图像
 
-<center class="half">    <img src="E:\typora\Project\OpenCV4.assets\image-20231218174019459.png" width="300"/>    <img src="E:\typora\Project\OpenCV4.assets\image-20231218174237515.png" width="300"/> </center>																	
+<center class="half">    <img src="OpenCV4.assets\image-20231218174019459.png" width="300"/>    <img src="OpenCV4.assets\image-20231218174237515.png" width="300"/> </center>																	
 
 ​																			高阈值处理后的图像
 
-![image-20231218174252400](E:\typora\Project\OpenCV4.assets\image-20231218174252400.png)
+![image-20231218174252400](OpenCV4.assets\image-20231218174252400.png)
 
 ## 8.7 Laplacian 算子
 
@@ -1132,7 +1093,7 @@ Laplace算子的优点：只有一个卷积核，所//以器计算成本比其�
 
 Laplace算子的缺点：它不像Sobel和Prewitt算子那样对图像进行了平滑处理，所以它会对噪声产生较大的响应，误将噪声当作边缘，并且得不到有方向的边缘。
 
-![一些常用形式](https://img-blog.csdnimg.cn/20200626225440359.png)
+![一些常用形式](OpenCV4.assets/20200626225440359.png)
 
 Laplace核内的所有值的和必须为0。
 
@@ -1150,7 +1111,7 @@ void laplacian(InputArray src, OutputArray dst, int ddepth, int borderType)
 
 ### 8.7.3 处理结果
 
-![image-20231218180732090](E:\typora\Project\OpenCV4.assets\image-20231218180732090.png)
+![image-20231218180732090](OpenCV4.assets\image-20231218180732090.png)
 
 ## 8.8 高斯拉普拉斯（LoG）边缘检测
 
@@ -1190,7 +1151,7 @@ Mat LoG(InputArray image, float sigma, int win)
 
 ### 8.8.3 运行结果
 
-![image-20231218192252983](E:\typora\Project\OpenCV4.assets\image-20231218192252983.png)
+![image-20231218192252983](OpenCV4.assets\image-20231218192252983.png)
 
 ## 8.9 高斯差分（DoG)边缘检测
 
@@ -1248,7 +1209,7 @@ cout << rect << endl;
 
 ​																输出结果为：
 
-![image-20231220101454298](E:\typora\Project\OpenCV4.assets\image-20231220101454298.png)
+![image-20231220101454298](OpenCV4.assets\image-20231220101454298.png)
 
 
 
@@ -1290,7 +1251,7 @@ RotatedRect rRect(Point2f(200, 200), Point2f(90, 150), -60);
 
 输出结果为：
 
-<img src="E:\typora\Project\OpenCV4.assets\image-20231220104557767.png" alt="image-20231220104557767" style="zoom:50%;" />
+<img src="OpenCV4.assets\image-20231220104557767.png" alt="image-20231220104557767" style="zoom:50%;" />
 
 ### 9.1.3 最小外包圆
 
@@ -1319,7 +1280,7 @@ cout << "半径:" << radius << endl;	//5.07216
 
 输出结果
 
-![image-20231220105938408](E:\typora\Project\OpenCV4.assets\image-20231220105938408.png)
+![image-20231220105938408](OpenCV4.assets\image-20231220105938408.png)
 
 ### 9.1.4 最小外包直立矩形
 
@@ -1500,11 +1461,11 @@ void on_HoughLines(int, void*)
 
 
 
-![image-20231220132334373](E:\typora\Project\OpenCV4.assets\image-20231220132334373.png)
+![image-20231220132334373](OpenCV4.assets\image-20231220132334373.png)
 
 随着累加阈值的减少，被识别为直线的线段增加。
 
-<center class="half">    <img src="E:\typora\Project\OpenCV4.assets\image-20231220134028892.png" width="400"/>    <img src="E:\typora\Project\OpenCV4.assets\image-20231220134122784.png" width="400"/> </center>		
+<center class="half">    <img src="OpenCV4.assets\image-20231220134028892.png" width="400"/>    <img src="OpenCV4.assets\image-20231220134122784.png" width="400"/> </center>		
 
 
 
@@ -1586,15 +1547,15 @@ int maxRadius=0 				// 表示圆半径的最大值
 
 param2=100时
 
-![image-20231220145348905](E:\typora\Project\OpenCV4.assets\image-20231220145348905.png)
+![image-20231220145348905](OpenCV4.assets\image-20231220145348905.png)
 
 param2=50时，产生了很多不存在的圆
 
-![image-20231220145532278](E:\typora\Project\OpenCV4.assets\image-20231220145532278.png)
+![image-20231220145532278](OpenCV4.assets\image-20231220145532278.png)
 
 param2=200时，产生的圆质量很好
 
-![image-20231220145645912](E:\typora\Project\OpenCV4.assets\image-20231220145645912.png)
+![image-20231220145645912](OpenCV4.assets\image-20231220145645912.png)
 
 
 
@@ -1698,7 +1659,7 @@ Point offset=Point() 			// 代表轮廓点的偏移量，可以设置为任意�
 	return 0;
 ```
 
-![image-20231220152203094](E:\typora\Project\OpenCV4.assets\image-20231220152203094.png)
+![image-20231220152203094](OpenCV4.assets\image-20231220152203094.png)
 
 ### 9.4.2 外包、拟合轮廓
 
@@ -1758,7 +1719,7 @@ void Approx(Mat img,string outdir)
 
 输出结果：
 
-![image-20231220155247005](E:\typora\Project\OpenCV4.assets\image-20231220155247005.png)
+![image-20231220155247005](OpenCV4.assets\image-20231220155247005.png)
 
 
 
@@ -1791,9 +1752,9 @@ double ContourArea(IEnumerable<Point2f> contour,
     bool oriented = false)
 ```
 
-![image-20231224125108700](E:\typora\Project\OpenCV4.assets\image-20231224125108700.png)
+![image-20231224125108700](OpenCV4.assets\image-20231224125108700.png)
 
-![image-20231224125657987](E:\typora\Project\OpenCV4.assets\image-20231224125657987.png)
+![image-20231224125657987](OpenCV4.assets\image-20231224125657987.png)
 
 ### 9.4.4 点和轮廓的位置关系
 
@@ -1817,9 +1778,9 @@ double pointPolygonTest(InputArray contour,Point2f pt, bool measureDist)
 
 
 
-![image-20231224215409334](E:\typora\Project\OpenCV4.assets\image-20231224215409334.png)
+![image-20231224215409334](OpenCV4.assets\image-20231224215409334.png)
 
-![image-20231224215423398](E:\typora\Project\OpenCV4.assets\image-20231224215423398.png)
+![image-20231224215423398](OpenCV4.assets\image-20231224215423398.png)
 
 
 
@@ -2040,7 +2001,7 @@ void Spectrum(Mat img)
 
 输出结果：
 
-![image-20231225124210715](E:\typora\Project\OpenCV4.assets\image-20231225124210715.png)
+![image-20231225124210715](OpenCV4.assets\image-20231225124210715.png)
 
 ## 10.3 谱残差显著性检测
 
@@ -2136,7 +2097,7 @@ void SaliencyMap(Mat image)
 
 ### 10.3.3 输出结果
 
-![image-20231225131853774](E:\typora\Project\OpenCV4.assets\image-20231225131853774.png)
+![image-20231225131853774](OpenCV4.assets\image-20231225131853774.png)
 
 
 
@@ -2150,7 +2111,7 @@ void SaliencyMap(Mat image)
 
 频率域滤波器在程序或者数学运算中可以理解为一个矩阵，下面所涉及的常用的低通、高通、带通、带阻等滤波的关键步骤，就是通过一定的准则构造该函数的。
 
-![image-20231225155339389](E:\typora\Project\OpenCV4.assets\image-20231225155339389.png)
+![image-20231225155339389](OpenCV4.assets\image-20231225155339389.png)
 
 
 
@@ -2166,15 +2127,15 @@ void SaliencyMap(Mat image)
 
 （1）理想低通滤波器
 
-![image-20231225160427688](E:\typora\Project\OpenCV4.assets\image-20231225160427688.png)
+![image-20231225160427688](OpenCV4.assets\image-20231225160427688.png)
 
 （2）巴特沃斯滤波器
 
-![image-20231225160437085](E:\typora\Project\OpenCV4.assets\image-20231225160437085.png)
+![image-20231225160437085](OpenCV4.assets\image-20231225160437085.png)
 
   (3)  高斯低通滤波器
 
-![image-20231225160504994](E:\typora\Project\OpenCV4.assets\image-20231225160504994.png)
+![image-20231225160504994](OpenCV4.assets\image-20231225160504994.png)
 
 代码实现如下：
 
@@ -2234,15 +2195,15 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 （1）理想高通滤波器
 
-![image-20231225165218667](E:\typora\Project\OpenCV4.assets\image-20231225165218667.png)
+![image-20231225165218667](OpenCV4.assets\image-20231225165218667.png)
 
 （2）巴特沃斯高通滤波器
 
-![image-20231225165229448](E:\typora\Project\OpenCV4.assets\image-20231225165229448.png)
+![image-20231225165229448](OpenCV4.assets\image-20231225165229448.png)
 
 （3）高斯高通滤波器
 
-![image-20231225165240001](E:\typora\Project\OpenCV4.assets\image-20231225165240001.png)
+![image-20231225165240001](OpenCV4.assets\image-20231225165240001.png)
 
 ​		代码方面只需要将低通滤波的滤波部分改为高通滤波。
 
@@ -2256,7 +2217,7 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 （1）理想带通滤波器
 
-![image-20231225170026381](E:\typora\Project\OpenCV4.assets\image-20231225170026381.png)
+![image-20231225170026381](OpenCV4.assets\image-20231225170026381.png)
 
 （2）巴特沃斯带通滤波器
 
@@ -2264,21 +2225,21 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 （3)  高通带通滤波器
 
-<img src="E:\typora\Project\OpenCV4.assets\image-20231225165952514.png" alt="image-20231225165952514" style="zoom:150%;" />
+<img src="OpenCV4.assets\image-20231225165952514.png" alt="image-20231225165952514" style="zoom:150%;" />
 
 ### 11.3.2 三种常用的带阻滤波器
 
 （1）理想带阻滤波器
 
-![image-20231225170748109](E:\typora\Project\OpenCV4.assets\image-20231225170748109.png)
+![image-20231225170748109](OpenCV4.assets\image-20231225170748109.png)
 
 （2）巴特沃斯带阻滤波器
 
-![image-20231225170803773](E:\typora\Project\OpenCV4.assets\image-20231225170803773.png)
+![image-20231225170803773](OpenCV4.assets\image-20231225170803773.png)
 
 （3）高斯带阻滤波器
 
-![image-20231225170819933](E:\typora\Project\OpenCV4.assets\image-20231225170819933.png)
+![image-20231225170819933](OpenCV4.assets\image-20231225170819933.png)
 
 
 
@@ -2308,7 +2269,7 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 1.
 
-![image-20231215145052107](E:\typora\Project\OpenCV4.assets\image-20231215145052107.png)
+![image-20231215145052107](OpenCV4.assets\image-20231215145052107.png)
 
 ​		解决方法：检查con2D的申明和定义中是否重复赋给了某个参数初值。去掉赋的初值后，报错解除。
 
@@ -2316,7 +2277,7 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 2.
 
-![image-20231215164731139](E:\typora\Project\OpenCV4.assets\image-20231215164731139.png)
+![image-20231215164731139](OpenCV4.assets\image-20231215164731139.png)
 
 ​		解决方法：在头文件中#include <opencv2/core/types.hpp>
 
@@ -2332,7 +2293,7 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 4.
 
-![image-20231217223013973](E:\typora\Project\OpenCV4.assets\image-20231217223013973.png)
+![image-20231217223013973](OpenCV4.assets\image-20231217223013973.png)
 
 ​		解决方法：\#include <opencv2/imgproc/imgproc_c.h>
 
@@ -2340,13 +2301,13 @@ Mat createLPFilter(Size size, Point center, float radius, int type, int n=2)
 
 5.
 
-![image-20231218001437655](E:\typora\Project\OpenCV4.assets\image-20231218001437655.png)
+![image-20231218001437655](OpenCV4.assets\image-20231218001437655.png)
 
 ​		解决方法：main()打错了，很低级的错误。
 
 6.
 
-![image-20231218172820064](E:\typora\Project\OpenCV4.assets\image-20231218172820064.png)
+![image-20231218172820064](OpenCV4.assets\image-20231218172820064.png)
 
 ​		解决方法：由于不同OpenCV版本不同，CV_THRESH_BINARY_INV 修改为cv::THRESH_BINARY_INV
 
