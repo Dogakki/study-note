@@ -84,3 +84,74 @@ roscore
 出现这个便证明安装成功
 
 ![image-20240421123557824](Ubuntu.assets/image-20240421123557824.png)
+
+# ROS部分知识
+
+## ROS部分指令
+
+### rospack
+
+![image-20240423141237977](Ubuntu.assets/image-20240423141237977.png)
+
+### roscd
+
+![image-20240423141312810](Ubuntu.assets/image-20240423141312810.png)
+
+### **rosls**
+
+![image-20240423141343538](Ubuntu.assets/image-20240423141343538.png)
+
+### rosdep
+
+![image-20240423141410528](Ubuntu.assets/image-20240423141410528.png)
+
+一个较常使用的命令是 
+
+```shell
+rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y
+```
+
+用于安装工作空间中 src 路径下所有 package 的依赖项（由 pacakge.xml 文件指定）。
+
+## ROS通讯部分
+
+​		在 ROS 系统中，最小的进程单元就是节点（node），节点就是一个进程（process），只不过在ROS 中它被赋予了专用的名字。一个软件包里可以有多个可执行文件，可执行文件在运行之后就成了一个进程，即节点。从程序角度来说，一个节点就是一个可执行文件（通常为 C++编译生成的可执行文件、Python 脚本）被执行，加载到了内存中；从功能角度来说，通常一个 node 负责者机器人的某一个单独的功能。ROS 中操作节点的命令为 rosnode，它的详细用法如下：
+
+![image-20240423141623489](Ubuntu.assets/image-20240423141623489.png)	启动节点管理器的命令为：
+
+```shell
+roscore
+```
+
+​		启动节点的命令是 rosrun，每一次运行节点之前，都要先启动节点管理器，这样才能够让节点启动和注册。也就是说，运行 rosrun 命令之前，需要确保 roscore 已经启动，否则 rosrun 命令会报错并等待直到 roscore 启动。rosrun 命令的用法为：
+
+```shell
+rosrun pkg_name node_name
+```
+
+​	通常一个机器人运行操作时要开启很多个节点，对于一个复杂的机器人的启动操作并不需要每个节点依次运行 rosrun 命令，ROS 提供了一个能一次性启动 master 和多个 node 的命令，即 roslaunch命令，它的用法为：
+
+```shell
+ roslaunch pkg_name file_name.launch
+```
+
+# ROS报错处理
+
+![image-20240423210200269](Ubuntu.assets/image-20240423210200269.png)
+
+​		
+
+​		第一行报错解决方式，其实是因为最开始执行`echo "source /opt/ros/noetic/setup.bash" >>~/.bashrc`已经把该路径写入环境中了。
+​		解决方法：
+
+```shell
+cd ~
+gedit .bashrc
+```
+
+​		翻到最后部分，把错误的路径source /opt/ros/noetic/setup.bash和多余的路径source /opt/ros/melodic/setup.bash删掉，留一个source /opt/ros/melodic/setup.bash即可，点击右上角保存，然后退出，重新执行4和5步。这里如果不执行第4步还是会出现上述同样的问题。
+​		第二行报错解决方式，首先打开主目录，按下ctrl+H，显示隐藏文件，然后打开.bashrc文件，下拉到底部，删除下面图片中的选中位置，仅保留source /opt/ros/noetic/setup.bash
+
+![image-20240423210958708](Ubuntu.assets/image-20240423210958708.png)
+
+​	重新打开终端，问题解决。

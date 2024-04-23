@@ -6,4 +6,4 @@
 4、git commit -m '记录本次提交的名称（随意填写）'
 5、git remote rm origin
 6、git remote add origin git@github.com:Dogakki/study-note.git
-6、git push origin master
+6、git push origin main
