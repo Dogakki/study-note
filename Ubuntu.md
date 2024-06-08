@@ -1,4 +1,6 @@
-# 更改分辨率的方式
+# 实用指令
+
+## 更改分辨率的方式
 
 1.打开终端（Ctrl+Alt+T)，输入命令 xrandr ，获取当前显示系统的输出设备名称和已有的分辨率。我的输出设备是红框内的 Virtual1 。
 
@@ -17,6 +19,35 @@ xrandr --output Virtual1 --mode "1920x1080_60.00"
 
  按下Enter键后屏幕分辨率就改成1920x1080了。以上只是临时改变屏幕分辨率，还需以下步骤永久设置屏幕分辨率。
 
+## 查看内存分配
+
+```shell
+baobab
+```
+
+## 切换Python的版本
+
+设置Python2及Python3优先级
+
+```shell
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 100
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 200
+```
+
+查看目前使用的Python版本
+
+```shell
+python --version
+```
+
+手动切换：由Python3切换到Python2
+
+```shell
+sudo update-alternatives --config python
+```
+
+
+
 # VIM使用方法
 
 ![image-20240421112430394](Ubuntu.assets/image-20240421112430394.png)
@@ -32,7 +63,48 @@ xrandr --output Virtual1 --mode "1920x1080_60.00"
 `:cq` 退出，不保存，带有非零退出代码以指示失败（简称为 :cquit）
 您还可以通过在 “Normal mode” 中键入 ZZ 来直接退出 Vim（等同于 :x）或键入 ZQ 仅退出（等同于 :q!）。（注意大小写在这里很重要。ZZ 和 zz 不表示相同的事情。）
 
-# 安装ros（以16.04为例）
+# DOCKER
+
+## Docker思想
+
+​	没有集装箱之前运输货物,东西零散容易丢失,有了集装箱之后货物不容易丢失,我们可以把货物想象成程序,目前我们要把程序部署到一台新的机器上,可能会启动不起来,比如少一些配置文件什么的或者少了什么数据,有了docker的集装箱可以保证我们的程序不管运行在哪不会缺东西。
+
+## Docker指令
+
+```shell
+#1、命令汇总
+docker version            #显示docker的版本信息
+docker info               #显示docker的系统信息，包括镜像和容器的数量
+docker --help             #帮助命令
+docker 子命令 --help       #子命令的帮助命令
+
+#2、容器命令
+docker run imageName[:tag]                                     #新建容器并启动
+docker ps                                                      #列出所有运行的容器
+docker ps -a                                                   #列出所有容器
+docker exec -it containerId或containerName /bin/bash           #进入容器内部
+exit/Ctrl+P+Q                                                  #退出容器
+docker stop start restart kill containerId或containerName      #启停容器
+docker rm containerId或containerName                           #删除指定容器
+docker rm -f containerId或containerName                        #强制删除启动的容器
+docker rm -f $(docker ps -aq)                                  #强制删除所有容器
+docker rm $(docker ps -q -f status=exited)        			   #删除所有未运行的容器
+docker inspect containerId或containerName                      #查看容器信息
+docker logs containerId或containerName                         #查看容器日志
+docker top containerId或containerName                          #查看容器中进程信息
+docker cp containerId或containerName：容器内路径 宿主机路径        #从容器中拷贝文件到宿主机
+docker cp 宿主机路径 containerId或containerName：容器内路径        #从宿主机拷贝文件到容器
+docker diff containerId或containerName                         #容器运行后文件发生的变化
+docker commit containerId或containerName imageName[:tag]       #提交容器成为一个新的镜像
+
+#3.
+```
+
+
+
+# ROS
+
+## 安装ros（以16.04为例）
 
 ```shell
 sudo sh -c '. /etc/lsb-release && echo "deb http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu/ `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
@@ -85,8 +157,6 @@ roscore
 
 ![image-20240421123557824](Ubuntu.assets/image-20240421123557824.png)
 
-# ROS部分知识
-
 ## ROS部分指令
 
 ### rospack
@@ -135,7 +205,7 @@ rosrun pkg_name node_name
  roslaunch pkg_name file_name.launch
 ```
 
-# ROS报错处理
+## ROS报错处理
 
 ![image-20240423210200269](Ubuntu.assets/image-20240423210200269.png)
 
@@ -155,3 +225,12 @@ gedit .bashrc
 ![image-20240423210958708](Ubuntu.assets/image-20240423210958708.png)
 
 ​	重新打开终端，问题解决。
+
+![img](Ubuntu.assets/20191209204151959.png)
+
+找到对应包里面的CMakeLists.txt文件，向其中添加如下代码：
+
+```shell
+SET(CMAKE_CXX_FLAGS "-std=c++0x")
+```
+
