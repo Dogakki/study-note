@@ -309,7 +309,7 @@ switch (_param_mpc_pos_mode.get()) {
 make px4_sitl gazebo-classic
 ```
 
-打开 QGroundControl 
+打开 QGroundControl
 
 在控制台中，起飞并切换到 Position 模式：
 
@@ -434,13 +434,11 @@ vtol_att_control：垂直起降姿态控制器。
 
 Tools文件夹下是一些工具，比如下载工具、仿真环境等。
 
-
-
 # uORB话题订阅发布机制理解
 
-​       uORB(Micro Object Request Broker，微对象请求代理器)是PX4/Pixhawk系统中非常重要且关键的一个模块，它肩负了整个系统的数据传输任务，所有的传感器数据、GPS、PPM信号等都要从芯片获取后通过uORB进行传输到各个模块进行计算处理。实际上uORB是一套跨「进程」 的IPC通讯模块。在Pixhawk中， 所有的功能被独立以进程模块为单位进行实现并工作。而进程间的数据交互就由为重要，必须要能够符合实时、有序的特点。
+    uORB(Micro Object Request Broker，微对象请求代理器)是PX4/Pixhawk系统中非常重要且关键的一个模块，它肩负了整个系统的数据传输任务，所有的传感器数据、GPS、PPM信号等都要从芯片获取后通过uORB进行传输到各个模块进行计算处理。实际上uORB是一套跨「进程」 的IPC通讯模块。在Pixhawk中， 所有的功能被独立以进程模块为单位进行实现并工作。而进程间的数据交互就由为重要，必须要能够符合实时、有序的特点。
 
-​       Pixhawk使用的是NuttX实时ARM系统，uORB实际上是多个进程打开同一个设备文件，进程间通过此文件节点进行数据交互和共享。进程通过命名的「总线」交换的消息称之为「话题」(topic)，在Pixhawk 中，一个话题仅包含一种消息类型，通俗点就是数据类型。每个进程可以「订阅」或者「发布」话题，可以存在多个发布者，或者一个进程可以订阅多个话题，但是一条总线上始终只有一条消息。
+    Pixhawk使用的是NuttX实时ARM系统，uORB实际上是多个进程打开同一个设备文件，进程间通过此文件节点进行数据交互和共享。进程通过命名的「总线」交换的消息称之为「话题」(topic)，在Pixhawk 中，一个话题仅包含一种消息类型，通俗点就是数据类型。每个进程可以「订阅」或者「发布」话题，可以存在多个发布者，或者一个进程可以订阅多个话题，但是一条总线上始终只有一条消息。
 
 ## 应用框架
 
@@ -597,3 +595,27 @@ eg:
 
 ```
 
+# MAVROS通讯
+
+## 1.运行offboard例程
+
+打开QGcontrol
+
+启动具有用于连接到模拟器上运行的UXRCE-DDS客户端的设置的代理
+
+```powershell
+MicroXRCEAgent udp4 -p 8888
+```
+
+```powershell
+cd PX4....
+make px4_sitl gz_x500
+```
+
+```powershell
+cd ROS2_PX4_ws
+source install/local_setup.bash
+ros2 run px4_ros_com offboard_control
+```
+
+此时可以在Gazebo中看到无人机起飞了
