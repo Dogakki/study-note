@@ -1,6 +1,6 @@
 # 整体框架
 
-**基础理论（第 1 章）→ 单积分器静态一致（第 2 章）→ 单积分器跟踪一致（第 3 章）→ 双积分器无参考一致（第 4 章）→双积分器参考跟踪（第 5 章）**
+**基础理论（第 1 章）→ 单积分器静态一致（第 2 章）→ 单积分器跟踪一致（第 3 章）→ 双积分器无参考一致（第 4 章）→双积分器有参考跟踪（第 5 章）**
 
 ## 1.Overview of Consensus Algorithms in Cooperative Control
 
@@ -89,12 +89,14 @@
    $$u_i=\frac{1}{\eta_i}\left[\sum_{j=1}^n a_{ij}\dot{\xi}_j+a_{i(n+1)}\dot{\xi}^r\right]-\frac{1}{\eta_i}\Lambda_i\tanh\left[\sum_{j=1}^n a_{ij}(\xi_i-\xi_j)+a_{i(n+1)}(\xi_i-\xi^r)\right]$$
 
    保证 $u_i$ 有界且不依赖初始状态。
+   
+   
 
 ## 4.Consensus Algorithms for Double-integrator Dynamics
 
 本章将动态模型从 “单积分器” 升级为 “双积分器（$\dot{\xi}_i=\zeta_i,\dot{\zeta}_i=u_i$）”，更贴合实际智能体的运动（如位置 - 速度模型），是理论复杂度的 “关键跃升”。
 
-1. **基础算法设计** 控制输入需同时考虑信息状态（$\xi_i$，如位置）和其导数（$\zeta_i$，如速度）的偏差：
+1. **基础算法设计** 控制输入需同时考虑信息状态（$\xi_i$，位置）和其导数（$\zeta_i$，速度）的偏差：
 
    $u_i=-\sum_{j=1}^n a_{ij}(t)\left[(\xi_i-\xi_j)+\gamma(\zeta_i-\zeta_j)\right]$（$\gamma$>0 为速度耦合强度）
 
@@ -120,6 +122,8 @@
      $$u_i=-\sum_{j=1}^n\left[a_{ij}\tanh(K_r(\xi_i-\xi_j))+b_{ij}\tanh(K_v(\zeta_i-\zeta_j))\right]$$
 
      保证控制输入有界。
+     
+     
 
 ## 5.Extensions to a Reference Model
 
@@ -160,41 +164,51 @@
 - **收敛性分析**： 误差系统特征值由$\lambda^2+\alpha\lambda-\mu_i=0$（$\mu_i$为$-L_n$的特征值）决定，需满足$\alpha>\overline{\alpha}$$(\overline{\alpha}=\max_{\text{Im}(\mu_i)>0}\left|\mu_i\right|\sqrt{\frac{2}{-\text{Re}(\mu_i)}}）$，保证所有特征值实部为负。 
 - 核心结论：若$G_n$存在有向生成树且$\alpha$足够大，则$\xi_i(t)\to$内部一致、$\zeta_i(t)\to\zeta^r(t)$；若$G_n$为无向连通图，$\alpha>0$即可收敛（无需额外约束）。
 
-### 3. 信息状态与导数的参考一致性（Consensus for States and Derivatives）
+3. **信息状态与导数的参考一致性（Consensus for States and Derivatives）**
 
-本节升级目标：智能体的**状态（\(\xi_i\)）和导数（\(\zeta_i\)）需同时跟踪参考模型**（如无人机编队跟踪动态领航者的位置和速度），分 “全访问参考”“领航 - 跟随”“部分访问参考” 三种策略。
+本节升级目标：智能体的状态$\xi_i$和导数$\zeta_i$需同时跟踪参考模型（如无人机编队跟踪动态领航者的位置和速度），分 “全访问参考”“领航 - 跟随”“部分访问参考” 三种策略。
 
-#### （3.1）全访问参考模型（Full Access）
+3.1 全访问参考模型（Full Access）
 
-- **场景**：所有追随者可直接获取\(\xi^r\)、\(\zeta^r\)和\(\dot{\zeta}^r\)（如卫星编队中所有卫星均能接收地面站参考指令）。
-- **控制输入设计**：\(u_i=\dot{\zeta}^r-\alpha\left[(\xi_i-\xi^r)+\gamma(\zeta_i-\zeta^r)\right]-\sum_{j=1}^n a_{ij}\left[(\xi_i-\xi_j)+\gamma(\zeta_i-\zeta_j)\right]\) （引入状态偏差项\(\xi_i-\xi^r\)，直接调节位置跟踪参考）
-- **收敛性分析**： 定义误差\(\tilde{\xi}_i=\xi_i-\xi^r\)、\(\tilde{\zeta}_i=\zeta_i-\zeta^r\)，误差系统为：\(\dot{\tilde{\xi}}_i=\tilde{\zeta}_i\)，\(\dot{\tilde{\zeta}}_i=-\alpha(\tilde{\xi}_i+\gamma\tilde{\zeta}_i)-\sum_{j=1}^n a_{ij}\left[(\tilde{\xi}_i-\tilde{\xi}_j)+\gamma(\tilde{\zeta}_i-\tilde{\zeta}_j)\right]\) 核心结论：无论\(G_n\)拓扑如何（即使无交互），只要\(\gamma>\overline{\gamma}\)（由参考模型与拓扑共同决定），即可保证\(\tilde{\xi}_i(t)\to0\)、\(\tilde{\zeta}_i(t)\to0\)；若\(G_n\)有生成树，可加快收敛速度。
+- **场景**：所有追随者可直接获取$\xi^r$、$\zeta^r$和$\dot{\zeta}^r$（如卫星编队中所有卫星均能接收地面站参考指令）。
+- **控制输入设计**：$u_i=\dot{\zeta}^r-\alpha\left[(\xi_i-\xi^r)+\gamma(\zeta_i-\zeta^r)\right]-\sum_{j=1}^n a_{ij}\left[(\xi_i-\xi_j)+\gamma(\zeta_i-\zeta_j)\right]$ （引入状态偏差项$\xi_i-\xi^r$，直接调节位置跟踪参考）
+- **收敛性分析**： 定义误差$\tilde{\xi}_i=\xi_i-\xi^r$、$\tilde{\zeta}_i=\zeta_i-\zeta^r$，误差系统为：$\dot{\tilde{\xi}}_i=\tilde{\zeta}_i$，$\dot{\tilde{\zeta}}_i=-\alpha(\tilde{\xi}_i+\gamma\tilde{\zeta}_i)-\sum_{j=1}^n a_{ij}\left[(\tilde{\xi}_i-\tilde{\xi}_j)+\gamma(\tilde{\zeta}_i-\tilde{\zeta}_j)\right]$ 
+- 核心结论：无论$G_n$拓扑如何（即使无交互），只要$\gamma>\overline{\gamma}$（由参考模型与拓扑共同决定），即可保证$\tilde{\xi}_i(t)\to0$、$\tilde{\zeta}_i(t)\to0$；若$G_n$有生成树，可加快收敛速度。
 
-#### （3.2）领航 - 跟随策略（Leader-following）
+3.2 领航 - 跟随策略（Leader-following）
 
 - **场景**：仅一个追随者（领航者，如无人机编队中的长机）能获取参考模型，其余追随者仅能与邻居交互（拓扑为有向生成树，领航者为根）。
 
 - 控制输入设计
 
-  ：
-
-  - 领航者（\(i=k\)）：\(u_k=\dot{\zeta}^r-K_{r}\left(\xi_k-\xi^r\right)-K_{v}\left(\zeta_k-\zeta^r\right)\)（直接跟踪参考，PD 控制）
-  - 追随者（\(i≠k\)）：\(u_i=\dot{\zeta}_{i_\ell}-K_{r}\left(\xi_i-\xi_{i_\ell}\right)-K_{v}\left(\zeta_i-\zeta_{i_\ell}\right)\)（跟踪父节点\(i_\ell\)的状态，间接跟踪参考） （\(K_r,K_v\)为正定矩阵，保证跟踪误差收敛）
-
+  - 领航者$(i=k）$：$u_k=\dot{\zeta}^r-K_{r}\left(\xi_k-\xi^r\right)-K_{v}\left(\zeta_k-\zeta^r\right)$（直接跟踪参考，PD 控制）
+  - 追随者$(i≠k)$：$u_i=\dot{\zeta}_{i_\ell}-K_{r}\left(\xi_i-\xi_{i_\ell}\right)-K_{v}\left(\zeta_i-\zeta_{i_\ell}\right)$（跟踪父节点$i_\ell$的状态，间接跟踪参考） （$K_r,K_v$为正定矩阵，保证跟踪误差收敛）
+  
 - **收敛性分析**： 由有向生成树的 “层级传递性”，追随者误差通过父节点逐层传递到领航者，最终所有误差收敛到 0。核心优势：无需全局信息，仅需父子节点交互，适用于大规模编队。
 
-#### （3.3）部分访问参考的一般情况（General Case）
+3.3 部分访问参考的一般情况（General Case）
 
 - **场景**：多个追随者可获取参考（非全访问），拓扑为任意有向图（需包含参考节点的生成树），是最贴近实际的场景（如部分无人机配备高精度导航模块，可获取参考）。
-- **控制输入设计**：\(u_i=\frac{1}{\kappa_i}\left[\sum_{j=1}^n a_{ij}\dot{\zeta}_j+a_{i(n+1)}\dot{\zeta}^r\right]-\frac{1}{\kappa_i}\left[K_{r_i}\left(\xi_i-\bar{\xi}_i\right)+K_{v_i}\left(\zeta_i-\bar{\zeta}_i\right)\right]\) 其中\(\kappa_i=\sum_{j=1}^{n+1}a_{ij}\)（归一化权重），\(\bar{\xi}_i=\frac{\sum_{j=1}^n a_{ij}\xi_j+a_{i(n+1)}\xi^r}{\kappa_i}\)（局部协商的参考状态），\(\bar{\zeta}_i\)同理（局部协商的参考速度）。
-- **收敛性分析**： 定义协商误差\(e_i=\sum_{j=1}^n a_{ij}(\xi_i-\xi_j)+a_{i(n+1)}(\xi_i-\xi^r)\)，则误差系统满足\(\ddot{e}_i=-K_{r_i}e_i-K_{v_i}\dot{e}_i\)（渐近稳定）。结合拓扑有向生成树的 “信息传递性”，最终\(\xi_i(t)\to\xi^r(t)\)、\(\zeta_i(t)\to\zeta^r(t)\)。 核心创新：通过 “局部协商参考”，将集中式跟踪转化为分布式一致，无需全访问参考，且允许信息环路（区别于领航 - 跟随的严格层级）。
 
-### 4. 扩展：有界控制输入（Bounded Control Inputs）
+- **控制输入设计**：$u_i=\frac{1}{\kappa_i}\left[\sum_{j=1}^n a_{ij}\dot{\zeta}_j+a_{i(n+1)}\dot{\zeta}^r\right]-\frac{1}{\kappa_i}\left[K_{r_i}\left(\xi_i-\bar{\xi}_i\right)+K_{v_i}\left(\zeta_i-\bar{\zeta}_i\right)\right]$ 
+
+  其中$\kappa_i=\sum_{j=1}^{n+1}a_{ij}$（归一化权重），
+
+  $\bar{\xi}_i=\frac{\sum_{j=1}^n a_{ij}\xi_j+a_{i(n+1)}\xi^r}{\kappa_i}$（局部协商的参考状态），
+
+  $\bar{\zeta}_i$同理（局部协商的参考速度）。
+
+- **收敛性分析**： 定义协商误差$e_i=\sum_{j=1}^n a_{ij}(\xi_i-\xi_j)+a_{i(n+1)}(\xi_i-\xi^r)$，则误差系统满足$\ddot{e}_i=-K_{r_i}e_i-K_{v_i}\dot{e}_i$（渐近稳定）。结合拓扑有向生成树的 “信息传递性”，最终$\xi_i(t)\to\xi^r(t)$、$\zeta_i(t)\to\zeta^r(t)$。 核心创新：通过 “局部协商参考”，将集中式跟踪转化为分布式一致，无需全访问参考，且允许信息环路（区别于领航 - 跟随的严格层级）。
+
+4. 扩展：有界控制输入（Bounded Control Inputs）
 
 针对实际智能体控制输入存在物理约束（如电机扭矩限制）的问题，本章将第三章 “有界控制” 的思路扩展到双积分器参考跟踪场景：
 
-- **控制输入设计**：\(u_i=\frac{1}{\kappa_i}\left(\sum_{j=1}^n a_{ij}\dot{\zeta}_j+a_{i(n+1)}\dot{\zeta}^r\right)-\frac{1}{\kappa_i}\left[K_{r_i}\tanh(e_{\xi_i})+K_{v_i}\tanh(e_{\zeta_i})\right]\) 其中\(e_{\xi_i}=\sum_{j=1}^n a_{ij}(\xi_i-\xi_j)+a_{i(n+1)}(\xi_i-\xi^r)\)（状态协商误差），\(e_{\zeta_i}\)同理（速度协商误差），\(\tanh(\cdot)\)保证\(\left\|u_i\right\|_\infty\leq\) 常数（与初始状态无关）。
-- **收敛性分析**： 构造 Lyapunov 函数\(V=\sum_{i=1}^n\left[\log\cosh(e_{\xi_i})+\frac{1}{2}\dot{e}_{\zeta_i}^2\right]\)，证明\(\dot{V}\leq0\)，且最大不变集仅包含\(e_{\xi_i}=0\)、\(e_{\zeta_i}=0\)，最终实现跟踪且控制输入有界。
+- **控制输入设计**：$u_i=\frac{1}{\kappa_i}\left(\sum_{j=1}^n a_{ij}\dot{\zeta}_j+a_{i(n+1)}\dot{\zeta}^r\right)-\frac{1}{\kappa_i}\left[K_{r_i}\tanh(e_{\xi_i})+K_{v_i}\tanh(e_{\zeta_i})\right]$ 
+
+  其中$e_{\xi_i}=\sum_{j=1}^n a_{ij}(\xi_i-\xi_j)+a_{i(n+1)}(\xi_i-\xi^r)$（状态协商误差），$e_{\zeta_i}$同理（速度协商误差），$\tanh(\cdot)$保证$\left\|u_i\right\|_\infty\leq$ 常数（与初始状态无关）。
+
+- **收敛性分析**： 构造 Lyapunov 函数$V=\sum_{i=1}^n\left[\log\cosh(e_{\xi_i})+\frac{1}{2}\dot{e}_{\zeta_i}^2\right]$，证明$\dot{V}\leq0$，且最大不变集仅包含$e_{\xi_i}=0$、$e_{\zeta_i}=0$，最终实现跟踪且控制输入有界。
 
 # 数学补充
 
@@ -302,6 +316,18 @@ Lipschitz（利普希茨）条件是数学分析中用于描述函数性质的�
 - **机器学习和优化算法**：在梯度下降等优化算法中，函数的 Lipschitz 连续性可以帮助分析算法的收敛速度。若目标函数是 Lipschitz 连续的，能够为算法的收敛性提供理论保障，并且可以基于 Lipschitz 常数对收敛速度进行估计 。例如在深度学习的一些优化算法中，利用 Lipschitz 条件来分析网络参数更新过程中损失函数的变化情况，进而改进算法性能。
 - **信号处理**：在对信号进行处理和分析时，Lipschitz 条件可以用来描述信号的光滑程度。一个满足 Lipschitz 条件的信号，其变化不会过于剧烈，这对于信号的采样、滤波等操作有着指导意义 。比如在音频信号处理中，判断音频信号的 Lipschitz 性质，有助于选择合适的处理方法来提升音质。
 
+## 6.矩阵
+
+### 6.1矩阵的谱（**Spectrum**）
+
+​		对于一个 **n 阶方阵 A**（仅方阵有特征值，非方阵无谱），其谱的严格定义为：**矩阵 A 的所有特征值（Eigenvalue）构成的集合，记为 σ(A)（σ 为希腊字母 “西格玛”）**。
+
+​		简单来说，若 λ₁, λ₂, ..., λₙ是 A 的全部特征值，则 A 的谱为：σ(A) = {λ₁, λ₂, ..., λₙ}
+
+### 6.2矩阵指数
+
+![image-20250916103924928](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250916103924928.png)
+
 # 1.Overview of Consensus Algorithms in Cooperative Control
 
 ## 1.1 Introduction
@@ -314,13 +340,14 @@ Lipschitz（利普希茨）条件是数学分析中用于描述函数性质的�
 
 ​		一致性算法基础
 
-​		The basic idea of a consensus algorithm is to impose similar dynamics on the information states of each vehicle。
+​		多智能体团队（假设有*n*个车辆）的通信拓扑结构，用有向图$\mathcal{Gn}≜(V_n,E_n)$表示，其中$Vn={1,…,n}$是节点集，$E_n⊆V_n×V_n$是边集，还提到通信拓扑可能因车辆运动或通信中断（比如无人机倾斜远离邻居、飞过城市峡谷时）而随时间变化。
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250702111318958.png" alt="image-20250702111318958" style="zoom:50%;" />
-
+$$
+\dot{x}_i(t)=-\sum_{j = 1}^{n}a_{ij}(t)[x_i(t)-x_j(t)],\ i = 1,\dots,n\tag{1.1}
+$$
 ​		其中$a_{ij}(t)$是邻接矩阵$\mathcal A_n\in \mathcal R^{n×n}$的第{i,j}个元素。他用于表明第i个vehicle跟第j个vechicle是否有信息传递通道。算法的作用机制时利用这种由邻接矩阵刻画的交互关系，使得每个智能体的信息状态$x_i(t)$朝着其邻居智能体的信息状态发展，最终实现多智能体系统整体的状态一致性。
 
-![image-20250620115033788](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250620115033788.png)
+<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250620115033788.png" alt="image-20250620115033788" style="zoom:50%;" />
 
 ​		引入拉普拉斯矩阵$\mathcal L_{n}(t)$，它的对角元是邻接矩阵第i行的和（表示智能体i对外的总交互强度），非对角元是邻接矩阵对应元素的相反数(表示智能体i与j的交互关系)。
 
@@ -335,17 +362,8 @@ This chapter introduces consensus algorithms for single-integrator dynamics(单�
 $$
 \begin{equation}\varepsilon_{n}  ⊆ V_{n} × V_{n}\end{equation}\tag{2.1}
 $$
-​							
-$$
-同时定义了与有向图\begin{equation}G_{n}相关联的邻接矩阵A_{n}=[a_{ij}]∈R^{n×n}和非对称拉普拉斯矩阵L 
-_{n}
-​
- =[ℓ_ 
-{ij}
-​
- ]∈R 
-^{n×n}\end{equation}
-$$
+同时定义了与有向图$G_{n}$相关联的邻接矩阵$A_{n}=[a_{ij}]∈R^{n×n}$和非对称拉普拉斯矩阵$L _{n}=[ℓ_ {ij}]∈R ^{n×n}$
+
 举例说明单向通信链路的作用场景：
 
 - 在异构车队中，部分车辆有收发器（能收能发），而其他能力较弱的车辆只有接收器（只能收）时，单向通信链路就有用 。
@@ -359,20 +377,14 @@ $$
 
 信息状态$ξ_i$遵循单积分器动态式(2.2)，$u_i$ 是第i 个智能体（车辆等）的控制输入
 $$
-\begin{equation}ξ_i = u_i,     i = 1, . . . , n, \tag{2.2}\end{equation}
+\begin{equation}ξ_i = u_i,     i = 1, . . . , n, \end{equation}
 $$
 
 #### 连续时间下的一致性算法为
 
 $$
-\begin{equation}u_i = -\sum_{j=1}^n a_{ij}(t)(\xi_i - \xi_j)\end{equation}，i=1,...,n,\tag{2.3}
+\begin{equation}u_i = -\sum_{j=1}^n a_{ij}(t)(\xi_i - \xi_j)\end{equation}，i=1,...,n,\tag{2.2}
 $$
-
-$$
-\begin{equation}其中 a_{ij}(t)是时刻t 邻接矩阵(\mathcal{A}_n(t) \in \mathbb{R}^{n \times n}) 的元素，a_{ij}(t)>0 当且仅当 (j,i) \in \mathcal{E}_n（即智能体j 到i 有信息交互边 ）\end{equation}
-$$
-
-
 
 化为矩阵形式为
 $$
@@ -383,7 +395,7 @@ $$
 ​
  (t)⊗I_{m} 
 ​
- ]ξ\end{equation}\tag{2.4}
+ ]ξ\end{equation}\tag{2.3}
 $$
 
 - **一致性条件**：若对任意初始状态 ，当\(t ->∞) 时，$∥ξ_i(t)−ξ_j(t)∥=0$（所有智能体信息状态收敛到同一值 ），则达成一致性。
@@ -394,13 +406,11 @@ $$
 
 - **分布式特性**：两种算法都是**分布式**的 —— 每个智能体仅需邻居信息即可更新状态。
 
-#### 连续时间一致性算法（2.2）渐进达成一致性的引理及证明
 
-略。
 
-#### 离散时间一致性算法（2.4）渐进达成一致性的引理及证明
+**Lemma 2.2**
 
-略。
+
 
 ## 2.2  Consensus Under Fixed Interaction Topologies
 
@@ -408,15 +418,18 @@ $$
 
 ### 2.2.1 Consensus Using a Continuous-time Algorithm
 
-引理2.4
+**Lemma 2.4**
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250623175744388.png" alt="image-20250623175744388" style="zoom:50%;" />
+给定矩阵 $A=[a_{ij}]\in\mathcal R^{n×n}$，满足：
+
+- 对角线元素$a_{ii}≤0$ ，非对角线元素$a_{ij}≥0(i≠j)$；
+- 每行元素和$\sum^n_{j=1}a_{ij}=0$(即行和为0)。
 
 则矩阵A具有以下性质：
 
 1. 至少有一个零特征值，对应的特征向量是全1向量；
 2. 所有非零特征值都位于复平面的开左半平面；
-3. 矩阵A恰好有一个零特征值，当且仅当A对应的有向图Γ(A）存在有向生成树(directed spanning tree)。
+3. 矩阵A恰好有一个零特征值，当且仅当A对应的有向图$Γ(A）$存在有向生成树(directed spanning tree)。
 
 证明：略
 
@@ -427,19 +440,23 @@ $$
 - 矩阵$\mathcal L_n$有一个单重零特征值，对应的特征向量是全1向量$\mathcal 1_n$，且所有其他特征值都位于复平面的开右半平面（实部为正）；
 - 该有向图存在有向生成树(directed spanning tree)。
 
-**Lemma 2.6**
+证明：如果我们将非对称拉普拉斯矩阵乘以\(-1\)，得到的矩阵满足引理 2.4（Lemma 2.4）中定义的性质。
 
-1. 对任意t≥0，矩阵指数$e^{-\mathcal L_nt}$是行随机矩阵(row-stochastic matrix)，且对角线元素为正。
-2. $\mathcal L_n$的秩等于n-1，当且仅当它有单重零特征值；
+非对称拉普拉斯矩阵$\mathcal{L}_n = D - A$（D为度矩阵，A为邻接矩阵），其对角线元素$d_{ii}\geq0$，非对角线元素$-a_{ij}\leq0(i\neq j)$，不直接满足上述引理里 “对角线元素非正、非对角线元素非负” 的条件。而将$\mathcal{L}_n$乘以-1后，得到的$-\mathcal{L}_n = A - D$，此时对角线元素为$-d_{ii}\leq0$，非对角线元素为$a_{ij}\geq0(i\neq j)$，同时每行元素和仍为0（因为$\mathcal{L}_n$行和为0，乘以-1后行和还是0），这样就满足了相关引理的条件
+
+
+
+#### **Lemma 2.6**
+
+1. 对任意t≥0，矩阵指数$e^{-\mathcal L_nt}$是行随机矩阵(row-stochastic matrix)，且对角线元素为正。（行随机矩阵的定义：矩阵中每一行的元素之和都为1，且所有元素非负。）
+2. $\mathcal L_n$的秩等于n-1，当且仅当它有单重零特征值 ；
 3. 若$\mathcal L_n$有单重零特征值，且非负向量$v=[v_1,...,v_n]^T$满足$1^T_nv=1$、$\mathcal L^T_nv=0$，则当t->∞时，$e^{-\mathcal L_nt}->1_nv^T$。
 
-**Theorem 2.8**
 
-条件：$\mathcal A_n$为常数矩阵。算法(2.2)渐近达成一致性，充要条件是有向图$\mathcal G_n$存在有向生成树。
 
-结果：当t->∞时，$ξ_i(t)->\sum^n_{i=1}v_iξ_i(0)$，其中$v=[v_1,...,v_n]^T≥0$，满足$1_nv^T=1、\mathcal L^T_nv=0$。
+#### Theorem 2.8
 
-#### Consensus Equilibrium
+条件：$\mathcal A_n$为常数矩阵。算法(2.2)渐近达成一致性的充要条件是有向图$\mathcal G_n$存在有向生成树。特别是，当t->∞时，$ξ_i(t)\rightarrow\sum^n_{i=1}v_iξ_i(0)$，其中$v=[v_1,...,v_n]^T≥0$，满足$1_nv^T=1、\mathcal L^T_nv=0$。
 
 
 
@@ -452,13 +469,13 @@ $$
 ​	后续又将基于静态一致性（static consensus）和一致性均衡（consensus equilibrium）相关小节，总结出两个引理（lemmas 2.10 、lemmas 2.11），为后续理论推导做铺垫，常见于多智能体系统、分布式协同控制等领域的文献，用于界定算法收敛的图拓扑条件 。
 ​	其中，强连通、平衡、连通是图论中描述图结构的专业概念，是分析多智能体间信息交互与协同收敛的基础 。
 
-引理 2.10
+**Lemma 2.10**
 
 ​		该引理关于矩阵特征值、系统一致性与图拓扑结构等价条件
 
 <img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250624152512039.png" alt="image-20250624152512039" style="zoom:50%;" />
 
-引理 2.11
+**Lemma 2.11**
 
 ​		该引理关于多智能体系统中与有向图、一致性及节点特性相关的引理
 
@@ -468,13 +485,15 @@ $$
 
 ​		说明一致性算法（2.2）可拓展，使智能体信息状态差收敛到期望(时变)偏差。给出用于相对状态偏差的算法 (2.8) 
 $$
-u_{i}=\dot{\delta}_{i}-\sum_{j=1}^{n} a_{i j}\left[\left(\xi_{i}-\xi_{j}\right)-\left(\delta_{i}-\delta_{j}\right)\right], \quad i=1, \ldots, n,(2.8)
+u_{i}=\dot{\delta}_{i}-\sum_{j=1}^{n} a_{i j}\left[\left(\xi_{i}-\xi_{j}\right)-\left(\delta_{i}-\delta_{j}\right)\right], \quad i=1, \ldots, n,\tag{2.8}
 $$
-​		通过选择 δ_l 可让状态差收敛到期望，在**队形控制**（formation control）中有应用（维持车辆相对位置形成队形 ）；
+​		通过选择 $δ_l$ 可让状态差收敛到期望，在**队形控制**（formation control）中有应用（维持车辆相对位置形成队形 ）；
 
-推论 2.12
+**Corollary 2.12**
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250624162118142.png" alt="image-20250624162118142" style="zoom:50%;" />
+​	 设$\mathcal A$为常数，在算法（2.8）下，$\xi_i(t)-\xi_j(t)\rightarrow\triangle_{ij}(t)(t\rightarrow\infin)$的充要条件是有向图$\mathcal G_n$存在有向生成树
+
+
 
 #### Dynamic Consensus (动态共识)
 
@@ -482,20 +501,22 @@ $$
 $$
 u_{i}=-\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+w_{i}, \quad i=1, \ldots, n, \tag  {2.9}
 $$
-​		其中w_i为干扰项
+​		其中$w_i$为干扰项
 
 ​		在一些特殊情况下，每一个车辆的信息状态由一样的时变输入$w^{f}(t)$给出。相关的共识算法变化为
 $$
 u_{i}=-\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+w^{f}, \quad i=1, \ldots, n , \tag{2.10}
 $$
 
-**定理 2.13**
+**Theorem 2.13.**
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625110251557.png" alt="image-20250625110251557" style="zoom:50%;" />
+​				假设$\mathcal{A}_n$是常数，算法（2.10）渐近地达成一致性，当且仅当有向图$\mathcal{G}_n$存在一棵有向生成树。特别地，当$t \to \infty$时，$\xi_i(t) \to \sum_{i = 1}^{n}\nu_i\xi_i(0)+\int_{0}^{t}w^f(\tau)d\tau$，其中$\nu = [\nu_1,\dots,\nu_n]^T \geq 0$，$\mathbf{1}_n^T\nu = 1$，且$\mathcal{L}_n^T\nu = 0$（这里$\mathcal{L}_n$是图$\mathcal{G}_n$的拉普拉斯矩阵等相关矩阵，$\xi_i$等是与系统状态相关的变量）。简单来说，就是在满足有向生成树的条件下，多智能体系统能通过算法（2.10）逐渐达成一致的状态，并且给出了状态趋近的极限形式。
 
-**定理 2.14**
+**Theorem 2.14.**
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625110710292.png" alt="image-20250625110710292" style="zoom:50%;" />
+​			假设$\mathcal{A}_n$是常数。在有向图$\mathcal{G}_n$存在一棵有向生成树的条件下，如果$\|w_i - w_j\|$是一致有界的，那么对于所有$i \neq j$，$\|\xi_i - \xi_j\|$也是一致有界的。
+
+​		简单来说，就是在满足有向生成树的情况下，若系统中相关的$w_i$和$w_j$的差值是有界的，那么对应状态$\xi_i$和$\xi_j$的差值也会是有界的，这体现了系统在这种条件下的稳定性或有界性特征。
 
 **备注 2.15**
 
@@ -521,7 +542,7 @@ $$
 
 <img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625140816926.png" alt="image-20250625140816926" style="zoom:50%;" />
 
-图 2.4 分别展示了使用算法（2.10）、γ=1 和 γ=5 时的动态一致性场景。τ 和 s 的共同预设规划方案分别由 ̇τ = ¹⁄₅|sin (t)| 和 ̇s = ¹⁄₄|cos (t)| 给出。此处，在（2.10）中令 wf (t) = [¹⁄₅|sin (t)|, ¹⁄₄|cos (t)|]ᵀ。可以看出，系统渐近达成一致性，且 τᵢ和 sᵢ均遵循其预设规划方案。
+Fig 2.4 分别展示了使用算法（2.10）、γ=1 和 γ=5 时的动态一致性场景。τ 和 s 的共同预设规划方案分别由 ̇τ = ¹⁄₅|sin (t)| 和 ̇s = ¹⁄₄|cos (t)| 给出。此处，在（2.10）中令 wf (t) = [¹⁄₅|sin (t)|, ¹⁄₄|cos (t)|]ᵀ。可以看出，系统渐近达成一致性，且 τᵢ和 sᵢ均遵循其预设规划方案。
 $$
 u_{i}=-\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+w^{f}, \quad i=1, \ldots, n , \tag{2.10}
 $$
@@ -529,75 +550,138 @@ $$
 
 ### 2.2.2 Consensus Using a Discretre-time Algorithm
 
-​		基于离散时间算法的共识机制
+​		基于离散时间算法的一致性机制
 
-#### Lemma 2.16
+**Lemma 2.16**
 
-![image-20250625142802387](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625142802387.png)
+​	若一个非负矩阵$A = [a_{ij}] \in \mathbb{R}^{n×n}$的每行和都为相同的正常数$\mu>0$，那么$\mu$是A的一个特征值，且对应的特征向量为全 1 向量$\mathbf{1}_n$，同时A的谱半径$\rho(A)=\mu$（谱半径指矩阵特征值的模的最大值）。
 
-#### Remark 2.17
+​	此外，A的特征值$\mu$的代数重数为 1，当且仅当A的有向图$\Gamma(A)$存在一棵有向生成树。
+
+​	进一步地，如果$a_{ii}>0$($i = 1,\dots,n$），那么对于每个不等于$\mu$的特征值$\lambda$，都有$|\lambda|<\mu$。
+
+​	而且，若$\Gamma(A)$存在一棵有向生成树且$a_{ii}>0$（$i = 1,\dots,n$），那么$\mu$是唯一的模最大的特征值。
+
+**Remark 2.17**
 
 ​		定理 C.5 表明，若非负矩阵A是不可约的，即A的有向图是强连通的，那么A的谱半径是单特征值。我们将说明，对于具有相同正行和的非负矩阵，不可约性条件过于严格。Lemma 2.16 明确表明，对于具有相同正行和的非负矩阵A，当且仅当A的有向图存在有向生成树时，A的谱半径（此时为行和）是单特征值。换言之，A可能是可约的，但仍保持其谱半径为单特征值。
 
 ​		此外，若A存在有向生成树且对角线元素为正，我们可以得到A的谱半径是模最大的唯一特征值 。
 
-#### Corollary 2.18
+**Corollary 2.18**
 
-#### ![image-20250625144403895](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625144403895.png)
+​		一个行随机矩阵$A = [a_{ij}] \in \mathbb{R}^{n×n}$，其谱半径$\rho(A)=1$对应的特征值的代数重数为 1，当且仅当A的有向图$\Gamma(A)$存在一棵有向生成树。
 
-​		代数重数为1，即该特征根有且只有一个的数值为1。
+​		进一步地，如果$a_{ii}>0$（$i = 1,\dots,n$），那么对于每个不等于 1 的特征值$\lambda$，都有$|\lambda|<1$。
 
-#### Lemma 2.19
+​		另外，若$\Gamma(A)$存在一棵有向生成树且$a_{ii}>0$（$i = 1,\dots,n$），那么 1 是唯一的模最大的特征值。
 
-![image-20250625145502212](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625145502212.png)		
 
-#### Theorem 2.20
 
-![image-20250625151852492](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625151852492.png)
+**Lemma 2.19**
+
+​		设$A = [a_{ij}] \in \mathbb{R}^{n×n}$是一个行随机矩阵。如果A有一个特征值$\lambda = 1$，且其代数重数为 1，同时所有其他特征值满足$|\lambda| < 1$，那么A是 **SIA（随机积分渐近，Stochastically Integral Asymptotic）** 的。
+
+​		特别地，当$m \to \infty$时，$\lim_{m \to \infty} A^m \to \mathbf{1}_n\nu^T$，其中$\nu$满足$A^T\nu = \nu$且$\mathbf{1}_n^T\nu = 1$。
+
+​		此外，$\nu$的每个元素都是非负的。
+
+**Theorem 2.20**
+
+假设$\mathcal{A}_n$是常数，离散时间算法（2.4）渐近地达成一致性，当且仅当有向图$\mathcal{G}_n$存在一棵有向生成树。
+
+特别地，$\xi_i[k] \to \sum_{i = 1}^{n}\nu_i\xi_i[0]$，其中$\nu = [\nu_1,\dots,\nu_n]^T \geq 0$，满足$\mathcal{D}_n^T\nu = \nu$且$\mathbf{1}_n^T\nu = 1$，简单来说，就是在$\mathcal{A}_n$为常数的情况下，离散时间的一致性算法要能逐渐让多智能体达成一致状态，有向图得存在有向生成树，并且最终每个智能体的状态会趋近于初始状态的加权和（权重由满足特定条件的$\nu$决定）。
+
+
+
+
 
 ## 2.3 Consensus Under Dynamically Changing Interaction Topologies
 
 多智能体系统在动态变化交互拓扑下的一致性。
 
-#### Lemma 2.21 
+**Lemma 2.21** 
 
-![image-20250625152818923](Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625152818923.png)
+​		给定$n×n$的非负矩阵A和B，如果对于某个$\alpha > 0$，有$A \geq \alpha B$，那么B的有向图$\Gamma(B)$是A的有向图$\Gamma(A)$的子图。
 
 #### Lemma 2.22
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625154415080.png" alt="image-20250625154415080" style="zoom:50%;" />
+​	给定$n×n$的非负矩阵P、Q、R和S，如果P与R是同类型（用$\sim$表示，其定义见附录C），且Q与S是同类型，那么($P + Q$)与($R + S$)是同类型，PQ与RS也是同类型。
+
+​	此外，如果一个元素连续的\(n×n\)时变非负矩阵\(M(t)\)在$t \in [t_1, t_2]$（$t_1 < t_2$）内是固定类型的，那么$M(t)$与$\int_{t_1}^{t_2} M(t)dt$是同类型的。
 
 #### Lemma 2.23
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625155003622.png" alt="image-20250625155003622" style="zoom: 50%;" />
+​		设$C(t) = [c_{ij}(t)] \in \mathbb{R}^{n×n}$是分段连续的矩阵，其中对于所有$i \neq j$，有$c_{ij} \geq 0$，且$\sum_{j} c_{ij} = 0$。令$\Phi_{C}(t, t_0)$为对应的转移矩阵，那么对于任意$t \geq t_0$，$\Phi_{C}(t, t_0)$是一个行随机矩阵，且其对角元素为正。
+
+​		简单来说，满足特定条件（非对角元素非负、每行元素和为0）的分段连续矩阵\(C(t)\)，其转移矩阵$\Phi_{C}(t, t_0)$具有行随机的性质（每行元素和为1），并且对角线上的元素都是正数。
 
 #### Lemma 2.24
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625155707350.png" alt="image-20250625155707350" style="zoom:50%;" />
+​		设$C(t) = [c_{ij}(t)] \in \mathbb{R}^{n×n}$和$\tilde{C} = [\tilde{c}_{ij}(t)] \in \mathbb{R}^{n×n}$在$t \in [\tau, s]$（$s > \tau$）上连续，其中对所有$i \neq j$，有$c_{ij}(t) \geq 0$且$\tilde{c}_{ij}(t) \geq 0$，并且$\sum_{j = 1}^{n} c_{ij}(t) = \sum_{j = 1}^{n} \tilde{c}_{ij}(t) = 0$。
+
+​		令$\Phi_{C}(s, \tau)$和$\Phi_{\tilde{C}}(s, \tau)$为对应的转移矩阵。假设$C(t)$和$\tilde{C}(t)$的有向图在$t \in [\tau, s]$上相同且固定，那么$C(t)$的有向图是$\Phi_{C}(s, \tau)$的有向图的子图，且$\Phi_{C}(s, \tau)$与$\Phi_{\tilde{C}}(s, \tau)$是 “同类型”（$\sim$所表示的关系，具体定义需结合相关背景）的。
+
+
 
 #### Lemma 2.25
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625160842043.png" alt="image-20250625160842043" style="zoom:50%;" />
+​		设$p \geq 2$为正整数，$P_1, P_2, \dots, P_p$是$n×n$的非负矩阵且对角元素为正，那么有$P_1P_2\cdots P_p \geq \gamma(P_1 + P_2 + \cdots + P_p)$，其中$\gamma > 0$可由$P_i$（$i = 1, \dots, p$）确定。
+
+​		简单来说，多个满足 “非负且对角元为正” 的$n×n$矩阵相乘的结果，在元素层面不小于这些矩阵之和的某个正倍数（这个正倍数$\gamma$能根据这些矩阵确定）。
+
+
 
 #### Lemma 2.26
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625161037398.png" alt="image-20250625161037398" style="zoom:50%;" />
+设$S_A = \{A_1, A_2, \dots, A_\ell\}$是一组行随机矩阵（每行元素和为1）且对角元素为正。
+
+- 若$A_i$的有向图存在一棵有向生成树，那么$A_i$是 **SIA（Stochastically Integral Asymptotic，随机积分渐近，一种矩阵性质）** 的。
+- 若$A_i$（$i = 1, \dots, \ell$）的有向图的并集存在一棵有向生成树，那么矩阵乘积$\prod_{i = 1}^{\ell} A_i$是 SIA 的。
+
+简单来说，对于满足 “行随机且对角元为正” 的矩阵，当单个矩阵的有向图或多个矩阵有向图的并集存在有向生成树时，该矩阵（或它们的乘积矩阵）具有 SIA 性质。
+
+
 
 #### Lemma 2.27
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625162905133.png" alt="image-20250625162905133" style="zoom:50%;" />
+​		设$\overline{\mathcal{G}}_n$表示n个智能体（车辆）所有可能的有向图的集合（且$\overline{\mathcal{G}}_n$的元素个数是有限的）。如果有向图集合${\mathcal{G}_n(t_1), \mathcal{G}_n(t_2), \dots, \mathcal{G}_n(t_p)}$（其中$\mathcal{G}_n(t_i) \in \overline{\mathcal{G}}_n$）的并集存在一棵有向生成树，且$\mathcal{L}_n(t_i)$是与每个有向图$\mathcal{G}_n(t_i)$相关联的非对称拉普拉斯矩阵，那么矩阵乘积$e^{-\mathcal{L}_n(t_p)\Delta t_p} \cdots e^{-\mathcal{L}_n(t_2)\Delta t_2} ,e^{-\mathcal{L}_n(t_1)\Delta t_1}$是 **SIA（Stochastically Integral Asymptotic，随机积分渐近，一种矩阵性质）** 的，其中\(\Delta t_i > 0\)且有下界。
+
+​		简单来说，当多个时刻的有向图（对应多智能体的通信拓扑）的并集存在有向生成树时，由各时刻非对称拉普拉斯矩阵指数运算构成的矩阵乘积具有 SIA 性质，这一结论在分析多智能体系统（单积分器动力学）的一致性等行为时具有重要作用。
+
+
 
 #### Lemma 2.28
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625163256374.png" alt="image-20250625163256374" style="zoom:50%;" />
+​		设$C(t) = [c_{ij}(t)] \in \mathbb{R}^{n×n}$在$t \in [\tau, s]$上是分段连续的，其中$s - \tau > 0$且有界，对于所有$i \neq j$，有$c_{ij} \geq 0$，且$\sum_{j} c_{ij} = 0$。如果$C(t)$在$t \in [\tau, s]$上的有向图的并集存在一棵有向生成树，那么转移矩阵$\Phi_{C}(s, \tau)$是 **SIA（Stochastically Integral Asymptotic，随机积分渐近）** 的。
+
+​		简单来说，满足 “分段连续、非对角元素非负、行和为0且有向图并集存在有向生成树” 条件的矩阵$C(t)$，其对应的转移矩阵$\Phi_{C}(s, \tau)$具有 SIA 性质，这一结论在分析系统的渐近行为等方面有重要作用。
+
+
 
 #### Lemma 2.29
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625172325481.png" alt="image-20250625172325481" style="zoom:50%;" />
+​			如果一组有向图${\mathcal{G}_n[k_1], \mathcal{G}_n[k_2], \dots, \mathcal{G}_n[k_p]}$（其中$\mathcal{G}_n[k_j] \in \overline{\mathcal{G}}_n$）的并集存在一棵有向生成树，那么矩阵乘积$\mathcal{D}_n[k_p] \cdots \mathcal{D}_n[k_2]\mathcal{D}_n[k_1]$是 **SIA（随机积分渐近）** 的，其中$\mathcal{D}_n[k_j]$是与每个有向图$\mathcal{G}_n[k_j]$相关联的,（2.5）式中的行随机矩阵。
+
+​		简单来说，当多个有向图的并集存在有向生成树时，对应这些有向图的行随机矩阵的乘积具有 SIA 性质，这一结论在多智能体系统的一致性等问题分析中具有重要作用。
+
+
 
 #### Lemma 2.30
 
-<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250625202028640.png" alt="image-20250625202028640" style="zoom:50%;" />
+- 设$\mathcal{S} = \{S_1, S_2, \dots, S_k\}$是有限个 SIA 矩阵的集合，满足对于每个长度为正的序列$S_{i_1}, S_{i_2}, \dots, S_{i_j}$，矩阵乘积$S_{i_j}S_{i_{j - 1}} \cdots S_{i_1}$是 SIA 的。那么对于每个无限序列$S_{i_1}, S_{i_2}, \dots$，存在列向量$\nu$，使得
+
+$$
+\lim_{j \to \infty} S_{i_j}S_{i_{j - 1}} \cdots S_{i_1} = \mathbf{1}_n\nu^T \tag{2.15}
+$$
+
+- 此外，当$\mathcal{S}$是无限集合时，$\chi(W) < 1$，其中$W = S_{k_1}S_{k_2} \cdots S_{k_{N_t + 1}}$，$N_t$是所有$n×n$ ，SIA 矩阵不同类型的数量（其定义见附录C）。而且，如果存在常数$0 \leq d < 1$满足$\chi(W) \leq d$，那么式 (2.15) 也成立。
+
+​	简单来说，满足特定条件的 SIA 矩阵集合，其无限序列的矩阵乘积会收敛到一个由全 1 列向量$\mathbf{1}_n$和列向量$\nu$的转置$\nu^T$构成的矩阵；同时对于无限的 SIA 矩阵集合，还存在关于矩阵乘积 “测度”$\chi(W)$的相关性质，且在$\chi(W)$有界的情况下，收敛性结论仍然成立。
+
+
+
+
 
 ### 2.3.1 Consensus Using a Continuous-time Algorithm
 
@@ -725,11 +809,12 @@ $$
 
 ## 3.2  Constant Consensus Reference State
 
-​		在这一节中，我们考虑共识算法的参考位置$ξ_r$是常数的情况，也就是对于式子（3.1)中的$f(t,ξ^r)\equiv0$。共识跟踪算法在Constant Consensus Reference State下被展示为
+​		在这一节中，我们考虑共识算法的参考位置$ξ^r$是常数的情况，也就是对于式子（3.1)中的$f(t,ξ^r)\equiv0$。共识跟踪算法在Constant Consensus Reference State下被展示为
 $$
 u_i=-\sum_{j=1}^{n} a_{ij}(ξ_i-ξ_j)-a_{i(n+1)}(ξ_i-ξ^r),\quad i=1,...,n,\tag{3.2}
 $$
-​		
+- 对于智能体间的误差 $e_{ij} = \xi_i - \xi_j$，引入项 $-\sum_{j=1}^n a_{ij} (\xi_i - \xi_j)$：这一项使智能体 i 向相邻智能体的状态 “看齐”，促进智能体间的一致性；
+- 对于智能体与参考状态的误差 $e_{ir} = \xi_i - \xi_r$，引入项 $-a_{i(n+1)} (\xi_i - \xi_r)$：这一项使智能体 i 向参考状态 $\xi_r$“看齐”，保证跟踪参考状态。
 
 **Theorem 3.2**
 
@@ -807,8 +892,15 @@ u_{i}= \frac{1}{\eta_{i}(t)} \sum_{j=1}^{n} a_{i j}(t)\left[\dot{\xi}_{j}-\gamma
 $$
 ​	其中$a_{ij}$是$A_{n+1}$的邻接矩阵在t时刻的第(i，j)个元素。
 
-- $\frac{1}{\eta_{i}(t)} \sum_{j=1}^{n} a_{i j}(t)\left[\dot{\xi}_{j}-\gamma\left(\xi_{i}-\xi_{j}\right)\right] $描述第 i 个智能体与其他 n 个智能体的**分布式交互**。通过邻接权重 $a_{ij}(t)$ 加权，结合 “其他智能体的状态变化率 $\dot{\xi}_j$ 和 “自身与其他智能体的状态偏差 $\xi_i - \xi_j$，实现智能体间的信息传递与状态协调。
-- $\frac{1}{\eta_{i}(t)} a_{i(n+1)}(t)\left[\dot{\xi}^{r}-\gamma\left(\xi_{i}-\xi^{r}\right)\right]$描述第 i 个智能体与**参考智能体的交互**。通过邻接权重 $a_{i(n + 1)}(t)$ 加权，结合 “参考智能体的状态变化率 $\dot{\xi}^r$ 和 “自身与参考智能体的状态偏差 $\xi_i - \xi^r$，引导自身状态向参考状态跟踪。
+- $\frac{1}{\eta_{i}(t)} \sum_{j=1}^{n} a_{i j}(t)\left[\dot{\xi}_{j}-\gamma\left(\xi_{i}-\xi_{j}\right)\right] $邻居交互项
+
+  描述第 i 个智能体与其他 n 个智能体的**分布式交互**。通过邻接权重 $a_{ij}(t)$ 加权，结合其他智能体的状态变化率 $\dot{\xi}_j$ 和 “自身与其他智能体的状态偏差 $\xi_i - \xi_j$，实现智能体间的信息传递与状态协调。$\frac{1}{\eta_{i}(t)} $是归一化因子。
+
+
+
+- $\frac{1}{\eta_{i}(t)} a_{i(n+1)}(t)\left[\dot{\xi}^{r}-\gamma\left(\xi_{i}-\xi^{r}\right)\right]$参考状态交互项
+
+  描述第 i 个智能体与**参考智能体的交互**。通过邻接权重 $a_{i(n + 1)}(t)$ 加权，结合 “参考智能体的状态变化率 $\dot{\xi}^r$ 和 “自身与参考智能体的状态偏差 $\xi_i - \xi^r$，引导自身状态向参考状态跟踪。
 
 
 
@@ -828,7 +920,7 @@ $$
 
 **Remark 3.9** 
 
-​		我们本质上已使用分布式Algorithm（3.4）实现了与集中式算法（3.6）相同的目标。
+​		我们本质上已使用分布式Algorithm（3.4）实现了与集中式算法(3.6)（见证明3.8）相同的目标。
 
 **Example 3.10**
 
@@ -879,8 +971,13 @@ u_{i}= \frac{1}{\eta_{i}}\left[\sum_{j=1}^{n} a_{i j} \dot{\xi}_{j}+a_{i(n+1)} \
 $$
 其中$u_i$是第 i 个智能体（或系统节点）的控制输入。
 
-- $\frac{1}{\eta_{i}}\left[\sum_{j=1}^{n} a_{i j} \dot{\xi}_{j}+a_{i(n+1)} \dot{\xi}^{r}\right] $这部分可看作是与系统中各节点（包括参考节点，索引为 \(n + 1\)）的状态变化率相关的项。其中 $a_{ij}$ 是邻接矩阵 $\mathcal{A}_{n+1}$ 的元素，反映了节点 i 与节点 j 之间的连接权重；$\dot{\xi}_j$ 是节点 j 状态 $\xi_j$ 的时间导数（状态变化率）；$\dot{\xi}^r$ 是参考状态 $\xi^r$ 的时间导数；$\eta_i \triangleq \sum_{j = 1}^{n + 1} a_{ij}$是对邻接矩阵第 i 行元素的求和，起到归一化等作用。
-- $\frac{1}{\eta_{i}} \Lambda_{i} \tanh \left[\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+a_{i(n+1)}\left(\xi_{i}-\xi^{r}\right)\right]$这部分是利用双曲正切函数 $\tanh$ 来实现控制输入有界的关键项。$\Lambda_i \in \mathbb{R}^{M\times M}$是对称正定矩阵，保证相关运算的合理性与稳定性；$\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+a_{i(n+1)}\left(\xi_{i}-\xi^{r}\right)$是节点 i 与其他节点（包括参考节点）的状态偏差组合，双曲正切函数 $\tanh$ 的值域在 \((-1,1)\) 之间，通过这种非线性函数可以将控制输入限制在一定范围内，实现有界控制。
+- $\frac{1}{\eta_{i}}\left[\sum_{j=1}^{n} a_{i j} \dot{\xi}_{j}+a_{i(n+1)} \dot{\xi}^{r}\right] $：动态跟踪项
+
+  这部分可看作是与系统中各节点（包括参考节点）的状态变化率相关的项。其中 $a_{ij}$ 是邻接矩阵 $\mathcal{A}_{n+1}$ 的元素，反映了节点 i 与节点 j 之间的连接权重；$\dot{\xi}_j$ 是节点 j 状态 $\xi_j$ 的时间导数（状态变化率）；$\dot{\xi}^r$ 是参考状态 $\xi^r$ 的时间导数；$\eta_i \triangleq \sum_{j = 1}^{n + 1} a_{ij}$是对邻接矩阵第 i 行元素的求和，起到归一化等作用。跟踪邻居状态的导数 $\dot{\xi}_j$ 和 参考状态的导数 $\dot{\xi}^r$，让智能体 “跟随” 系统的动态变化趋势；
+
+- $\frac{1}{\eta_{i}} \Lambda_{i} \tanh \left[\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+a_{i(n+1)}\left(\xi_{i}-\xi^{r}\right)\right]$：有界误差反馈项
+
+  这部分是利用双曲正切函数 $\tanh$ 来实现控制输入有界的关键项。$\Lambda_i \in \mathbb{R}^{M\times M}$是对称正定矩阵，保证相关运算的合理性与稳定性；$\sum_{j=1}^{n} a_{i j}\left(\xi_{i}-\xi_{j}\right)+a_{i(n+1)}\left(\xi_{i}-\xi^{r}\right)$是节点 i 与其他节点（包括参考节点）的状态偏差组合，双曲正切函数 $\tanh$ 的值域在 \((-1,1)\) 之间，通过这种非线性函数可以将控制输入限制在一定范围内，实现有界控制。
 
 ​		
 
@@ -912,7 +1009,7 @@ $$
 
 ​		注意到在共识跟踪算法（3.4）和（3.8）下，这里没有从跟随（followers)端到共识参考端的反馈。若某辆车因干扰或瞬时故障而无法跟踪共识参考状态，公式参考状态将按标称速度演化。不会对车辆的干扰或瞬时故障进行补偿。需要对算法进行改良，以实现跟随者（follower)对共识参考位置的反馈。
 
-​		其中一种策略是更新$ξ^r$
+​		其中一种策略是**更新$ξ^r$**
 $$
 \frac{d \xi^{r}}{d s}=f\left(s, \xi^{r}\right), \quad \frac{d s}{d t}=\frac{1}{1+z_{f}},\tag{3.9}
 $$
@@ -1098,7 +1195,7 @@ $$
 
 **Example. 4.8**
 
-​		无向连通拓扑和有向生成树可视为 “包含有向生成树” 的交互拓扑的特殊情况。当交互拓扑包含有向生成树时（如Fig 4.9 所示），即使共识算法由式（2.2）给出，也**可能无法达成共识**。然而，包含有向生成树是信息共识的**必要条件**。
+​		无向连通拓扑和有向生成树可视为 “包含有向生成树” 的交互拓扑的特殊情况。当交互拓扑包含有向生成树时（如Fig 4.9 所示），即使共识算法由式（2.2）给出，也**可能无法达成一致**。然而，包含有向生成树是信息共识的**必要条件**。
 
 <img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250909100526101.png" alt="image-20250909100526101" style="zoom:50%;" />
 
@@ -1139,7 +1236,7 @@ Before showin a sufficient condition for information consensus, we need the foll
 
 
 
-**Lemma. 4.11**
+**Theorem. 4.11**
 
 算法（4.2）能**渐近达成共识**的条件是：
 
@@ -1148,8 +1245,8 @@ Before showin a sufficient condition for information consensus, we need the foll
 
 $\bar{\gamma}$的取值分两种情况：
 
-- **情况 1**：若$-\mathcal{L}_n$的所有(n-1\)个非零特征值都是负数，则$\bar{\gamma} \triangleq 0$（此时只要$\gamma > 0\)，算法就能渐近共识）。
-- **情况 2**：否则（即存在非零特征值不满足 “实部为负”），\(\bar{\gamma}\)是对所有 “实部为负且虚部为正” 的特征值\(\mu_i\)，计算：
+- **情况 1**：若$-\mathcal{L}_n$的所有(n-1\)个非零特征值都是负数，则$\bar{\gamma} \triangleq 0$（此时只要$\gamma > 0$，算法就能渐近共识）。
+- **情况 2**：否则（即存在非零特征值不满足 “实部为负”），$\bar{\gamma}$是对所有 “实部为负且虚部为正” 的特征值$\mu_i$，计算：
 
 <img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250909110821478.png" alt="image-20250909110821478" style="zoom:50%;" />
 
@@ -1212,7 +1309,7 @@ Alternatively, if we reduce the length of each time interval to 1 second, consen
 
 <img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250910100312955.png" alt="image-20250910100312955" style="zoom:50%;" />
 
- 		Next, at each time interval of 5 seconds, we let the interaction topology be $Γ [L_{3(1)}]$ 90% of the time and be$ Γ [L_{3(3)}] $the rest of the time. Note that at each time interval of 5 seconds, the union of the interaction topologies $Γ [L_{3(1)}] ∪ Γ [L_{3(3)}]$ has a directed spanning tree. Also note that $Γ [L_{3(3)}] $is only a subgraph of $Γ [L_{3(2)}]$. In contrast to Fig. 4.14, Fig. 4.18 shows that consensus is achieved asymptotically even if $Γ [L_{3(3)}]$ has less information exchange than $Γ [L_{3(2)}]$.
+​	Next, at each time interval of 5 seconds, we let the interaction topology be $Γ [L_{3(1)}]$ 90% of the time and be$ Γ [L_{3(3)}] $the rest of the time. Note that at each time interval of 5 seconds, the union of the interaction topologies $Γ [L_{3(1)}] ∪ Γ [L_{3(3)}]$ has a directed spanning tree. Also note that $Γ [L_{3(3)}] $is only a subgraph of $Γ [L_{3(2)}]$. In contrast to Fig. 4.14, Fig. 4.18 shows that consensus is achieved asymptotically even if $Γ [L_{3(3)}]$ has less information exchange than $Γ [L_{3(2)}]$.
 
 <img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250910100740447.png" alt="image-20250910100740447" style="zoom:50%;" />
 
@@ -1246,11 +1343,11 @@ Alternatively, if we reduce the length of each time interval to 1 second, consen
 
 ## 4.2 Consensus with Bounded Control Inputs
 
-Note that (4.2) does not explicitly take into account a bounded control effort. We propose a consensus algorithm for (4.1) with bounded control inputs as
+Note that (4.2) does not explicitly take into account a bounded control(有界控制) effort. We propose a consensus algorithm for (4.1) with bounded control inputs as
 $$
 u_i = -\sum_{j=1}^{n} \left\{ a_{ij} \tanh\left[ K_r (\xi_i - \xi_j) \right] + b_{ij} \tanh\left[ K_v (\zeta_i - \zeta_j) \right] \right\}, \quad i = 1, \ldots, n, \tag{4.13}
 $$
- 		i 个智能体的控制输入 \(u_i\) 是通过对所有其他 n 个智能体，分别基于状态差 $(\xi_i - \xi_j)$ 和状态导数差 $(\zeta_i - \zeta_j)$，经双曲正切函数非线性处理后，再乘以相应权重 $a_{ij}$、$b_{ij}$ 并求和，最后取负得到的。
+​	i 个智能体的控制输入 $u_i$ 是通过对所有其他 n 个智能体，分别基于状态差 $(\xi_i - \xi_j)$ 和状态导数差 $(\zeta_i - \zeta_j)$，经双曲正切函数非线性处理后，再乘以相应权重 $a_{ij}$、$b_{ij}$ 并求和，最后取负得到的。
 
 ​	Suppose that $ς ∈ R_m$, $φ ∈ R_m$, $K ∈ R_{m×m}$, and $C = [cij ] ∈R_{n×n}$. If C is symmetrical, then
 $$
@@ -1318,19 +1415,23 @@ $$
 
 ​		假设$\mathcal{A}_n$为常数。如果无向图$\mathcal{G}_n$是连通的，那么算法（4.22）能渐近地达成一致性。
 
+
+
+
+
 # 5.Extensions to a Reference Model
 
 This chapter extends the consensus algorithms for double-integrator dynamics in Chapter 4 to a reference model. 
 
 ### 本章概括
 
-​		首先，我们考虑一类一致性算法：这类算法确保信息状态的导数（即信息状态随时间的变化率）能够跟踪某个参考信号。针对此类算法，我们既分析了 **“邻居间信息状态导数存在耦合”** 的策略，也分析了 **“邻居间信息状态导数无耦合”** 的策略。
+​		首先，我们考虑一类一致性算法：这类算法确保信息状态的导数（即信息状态随时间的变化率）能够跟踪某个参考信号。针对此类算法，我们既分析了 **“邻居间信息状态导数存在耦合5.2.1”** 的策略，也分析了 **“邻居间信息状态导数无耦合5.2.2”** 的策略。
 
 ​		随后，我们进一步考虑另一类一致性算法：这类算法确保信息状态本身及其导数，均能按照某个参考模型的动态特性演化。针对此类算法，我们重点分析了三种策略：
 
-1. **完全访问参考模型策略**：智能体可获取参考模型的完整信息；
-2. **领导者 - 跟随者策略**：指定部分智能体（领导者）作为参考，其余智能体（跟随者）通过跟踪领导者状态，间接实现与参考模型的一致；
-3. **部分访问参考模型策略**：智能体仅能获取参考模型的部分信息，而非完整信息。
+1. **完全访问参考模型策略**5.3.1：智能体可获取参考模型的完整信息；
+2. **领导者 - 跟随者策略**5.3.2：指定部分智能体（领导者）作为参考，其余智能体（跟随者）通过跟踪领导者状态，间接实现与参考模型的一致；
+3. **部分访问参考模型策略**5.3.3：智能体仅能获取参考模型的部分信息，而非完整信息。
 
 ### 5.1 Problem state
 
@@ -1360,10 +1461,9 @@ $$
 
 当**邻居的信息状态导数之间存在耦合时**(指一个智能体的信息状态导数，不是独立变化的，而是会受到其邻居智能体的信息状态导数的影响)，我们提出如下算法：
 $$
-
 u_i = \dot{\zeta}^r - \alpha(\zeta_i - \zeta^r) - \sum_{j=1}^{n} a_{ij}[(\xi_i - \xi_j) + \gamma(\zeta_i - \zeta_j)], \tag{5.2}
 $$
-其中$\alpha$和$\gamma$是正标量，$a_{ij}$是与图$\mathcal{G}_n$相关联的邻接矩阵$\mathcal{A}_n \in \mathbb{R}^{n \times n}$的第$(i,j)$个元素。注意，对于式$(5.2)$，$\xi^r$和$\zeta^r$对所有跟随者都是可获取的，这对应于$(n + 1, i) \in \mathcal{E}_{n+1}$(i = 1, $\dots$, n)的情况。
+其中$\alpha$和$\gamma$是正标量，$a_{ij}$是与图$\mathcal{G}_n$相关联的邻接矩阵$\mathcal{A}_n \in \mathbb{R}^{n \times n}$的第$(i,j)$个元素。
 
 **Lemma 5.2**
 
@@ -1383,9 +1483,327 @@ $$
 
 矩阵指数函数$e^{\Sigma t}$当$t \to \infty$时的极限为：
 $$
-
 \lim_{t \to \infty} e^{\Sigma t} \to \begin{bmatrix} \mathbf{1}_n p^T & \frac{1}{\alpha} \mathbf{1}_n p^T \\ 0_{n \times n} & 0_{n \times n} \end{bmatrix}
 $$
 **Corollary 5.3**：
 
 ​		设p如引理 5.2 中所定义。在一致性算法(5.2)下，当且仅当式(5.3)中定义的$\Sigma$有一个单重的零特征值，且所有其他特征值的实部为负时，当$t \to \infty$，$\xi_i(t) \to \sum_{i = 1}^{n} p_i \xi_i(0) + \int_{0}^{t} \zeta^r(\tau) d\tau + \frac{1}{\alpha} \sum_{i = 1}^{n} p_i \zeta_i(0) - \frac{1}{\alpha} \zeta^r(0)$，且$\zeta_i(t) \to \zeta^r(t)(i = 1, \dots, n)$，均是渐近成立的。
+
+
+
+**Theorem 5.4.**
+
+​		设 p 如引理 5.2（Lemma 5.2）中定义；$\mu_i$ 是 $-\mathcal{L}_n$ 的第 i 个特征值$\mathcal{L}_n$ 通常指图 $\mathcal{G}_n$ 的拉普拉斯矩阵，在多智能体系统中，拉普拉斯矩阵用于描述智能体间的通信拓扑关系）。
+
+​		当有向图 $\mathcal{G}_n$ 存在**有向生成树**，且满足不等式 (4.10) 时，随着 $t \to \infty$，一致性算法 (5.2) 能保证：对 $i = 1, \dots, n$，$\xi_i(t)$ 会收敛到 $\sum_{i = 1}^n p_i \xi_i(0) + \int_0^t \zeta^r(\tau) d\tau + \frac{1}{\alpha} \sum_{i = 1}^n p_i \zeta_i(0) - \frac{1}{\alpha} \zeta^r(0)$，同时 $\zeta_i(t)$ 收敛到 $\zeta^r(t)$（这里 $\xi$ 和 $\zeta$ 可理解为多智能体系统中各智能体的状态量，$\alpha$是算法中的参数，$\zeta^r$ 可能与参考状态等相关）。
+
+**Remark 5.5.**
+
+​		在某些情况下，希望当 $t \to \infty$ 时，满足 $\xi_i(t) \to \xi_j(t)$（即不同智能体的 $\xi$ 类状态趋于一致），且 $\zeta_i(t) \to 0$。
+
+​		以编队稳定（formation stabilization）应用为例：希望每个车辆能对 “先验未知的固定编队中心” 达成一致 —— 该编队中心位置固定、速度为 0。此时，只需令 $\zeta^r \equiv 0$（$\zeta^r$ 是与参考状态等相关的量），就能满足上述 “状态一致且 $\zeta$类状态趋于 0” 的需求。
+
+
+
+#### 5.2.2 Consensus Without Coupling Between Neighbors’ Information State Derivatives
+
+​		When there is coupling between neighbors’ information state derivatives, we propose a consensus algorithm as
+$$
+u_i = \dot{\zeta}^r - \alpha(\zeta_i - \zeta^r) - \sum_{j=1}^n a_{ij}(\xi_i - \xi_j), \quad i = 1, \dots, n \tag{5.8}
+$$
+
+- $\alpha$：正标量（用于调节算法特性）。
+- $a_{ij}$：与图 $\mathcal{G}_n$ 相关的邻接矩阵 $\mathcal{A}_n \in \mathbb{R}^{n \times n}$ 的第 $(i,j)$ 个元素（邻接矩阵用于描述多智能体间的通信拓扑，$a_{ij}$ 体现第 i 个与第 j 个智能体间的连接关系）。
+- $\zeta^r$、$\dot{\zeta}^r$：参考量及其导数；$\zeta_i$、$\xi_i$：第 i 个智能体的状态量。
+
+
+
+**Theorem 5.6.**
+
+设$\mu_i$为 $-\mathcal{L}_n$ 的第 i 个特征值。采用式 (5.8) 时，当 $t \to \infty$，若有向图 $\mathcal{G}_n$ 存在有向生成树，且
+$$
+\alpha > \bar{\alpha}, \tag{5.9}
+$$
+其中，若 $-\mathcal{L}_n$ 的所有 $n - 1$ 个非零特征值均为负，则 $\bar{\alpha} \triangleq 0$；否则
+$$
+\bar{\alpha} \triangleq \max_{\substack{\text{Re}(\mu_i) < 0 \\ \text{Im}(\mu_i) > 0}} |\mu_i| \sqrt{\frac{2}{-\text{Re}(\mu_i)}},
+$$
+那么对 $i = 1, \dots, n$，有 $\xi_i(t) \to \xi_j(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$。
+
+
+
+**Corollary 5.7**
+
+​		若假设图 $\mathcal{G}_n$ 是无向的，采用算法 (5.8) 时，当 $t \to \infty$，如果 $\mathcal{G}_n$ 是连通的，那么会有 $\xi_i(t) \to \xi_j(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$（即不同智能体的 $\xi$ 类状态趋于一致，各智能体的 $\zeta$ 类状态趋于参考状态 $\zeta^r$）。
+$$
+\dot{\xi}^r = \zeta^r, \quad \dot{\zeta}^r = f(t, \xi^r, \zeta^r)\tag{5.1}
+$$
+​	我们首先考虑两种特殊情况：一种是参考模型对团队中的所有follower都可用，另一种是 n 个follower的交互拓扑本身是一棵有向生成树。然后，我们考虑一般情况，即 \(n + 1\) 辆车的交互拓扑具有一棵有向生成树。
+
+### 5.3 Consensus with References for Information States and Their Derivatives
+
+在本节中，目标是确保当 $t \to \infty$ 时，$\xi_i(t) \to \xi^r(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$，其中 $\xi^r(t)$ 和 $\zeta^r(t)$ 满足参考模型 (5.1)。我们首先考虑两种特殊情况：一种是参考模型对团队中的所有跟随者都可用，另一种是 n 个跟随者的交互拓扑本身是一棵有向生成树。然后，我们考虑一般情况，即 \(n + 1\) 辆车的交互拓扑具有一棵有向生成树
+
+#### 5.3.1 Full Access to the Reference Model
+
+​		In this strategy, we incorporate in reference model (5.1), to each vehicle’s consensus Algorithm. The consensus algorithm for each vehicle is designed as
+$$
+\begin{aligned}
+u_i &= \dot{\zeta}^r - \alpha\left[(\xi_i - \xi^r) + \gamma(\zeta_i - \zeta^r)\right] \\
+&- \sum_{j=1}^n a_{ij}\left[(\xi_i - \xi_j) + \gamma(\zeta_i - \zeta_j)\right],
+\end{aligned} \tag{5.10}
+$$
+​		和公式5.2进行对比
+$$
+u_i = \dot{\zeta}^r - \alpha(\zeta_i - \zeta^r) - \sum_{j=1}^{n} a_{ij}[(\xi_i - \xi_j) + \gamma(\zeta_i - \zeta_j)], \tag{5.2}
+$$
+We have the following theorem for algorithm (5.10):
+
+
+
+##### **Theorem 5.8**
+
+若参数 $\gamma$ 满足 
+$$
+\gamma > \bar{\gamma}，\tag{5.11}
+$$
+$\bar{\gamma}$ 是与 $\nu_i$ 相关的阈值，具体定义为：
+
+- 若 $-\mathcal{L}_n$ 的所有 $n - 1$ 个非零特征值都为负，则 $\bar{\gamma} \triangleq 0$；
+- 否则，$\bar{\gamma} = \max_{\substack{\text{Re}(\nu_i) < 0 \\ \text{Im}(\nu_i) > 0}} \sqrt{\frac{2}{|\nu_i| \cos\left(\tan^{-1} \frac{\text{Im}(\nu_i)}{-\text{Re}(\nu_i)}\right)}}$，即对实部为负、虚部为正的 $\nu_i$，取对应表达式的最大值）。
+
+则当 $t \to \infty$ 时，系统能达成：对 $i = 1, \dots, n$，$\xi_i(t) \to \xi^r(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$。
+
+
+
+
+
+对$\bar{\gamma}$的表达式进行解释
+
+- $\max_{\substack{\text{Re}(\nu_i) < 0 \\ \text{Im}(\nu_i) > 0}}$：表示对所有满足 “实部 $\text{Re}(\nu_i) < 0$ 且虚部 $\text{Im}(\nu_i) > 0$” 的 $\nu_i$ 进行操作，取后续表达式的最大值。这里 $\nu_i$ 是与图拉普拉斯矩阵 $-\mathcal{L}_n$ 特征值 $\mu_i$ 以及算法参数 $\alpha$ 相关的量（通常 $\nu_i = -\alpha + \mu_i$），“实部负、虚部正” 的 $\nu_i$ 是影响系统稳定性的关键特征值情况。
+- $\sqrt{\frac{2}{|\nu_i| \cos\left(\tan^{-1} \frac{\text{Im}(\nu_i)}{-\text{Re}(\nu_i)}\right)}}$：
+  - $|\nu_i|$：是 $\nu_i$的模长，即 $\sqrt{(\text{Re}(\nu_i))^2 + (\text{Im}(\nu_i))^2}$。
+  - $\tan^{-1} \frac{\text{Im}(\nu_i)}{-\text{Re}(\nu_i)}$：是 $\nu_i$对应的辐角（因为 $\text{Re}(\nu_i) < 0$，所以辐角范围在$(0, \pi)$ 之间）,$\cos\left(\tan^{-1} \frac{\text{Im}(\nu_i)}{-\text{Re}(\nu_i)}\right)$ 则是该辐角的余弦值，用于刻画 $\nu_i$在复平面上的 “方向” 对阈值的影响。
+
+
+
+**Remark 5.9**
+
+- 与定理 5.4 和 5.6 不同，在定理 5.8 中，只要比例因子$\gamma$足够大，通信拓扑 $\mathcal{G}_n$ 不影响收敛结果
+  - 极端情况：即使跟随者之间 “无信息交换”（即邻接矩阵 $\mathcal{A}_n = 0_{n \times n}$，智能体间完全没通信），只要不等式 (5.11) 成立，当 $t \to \infty$，仍能保证 $\xi_i(t) \to \xi^r(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$（各智能体状态跟踪参考状态）。
+- 但暂态性能（过渡过程中的性能会受 $\mathcal{G}_n$ 影响：当 $\mathcal{G}_n$存在有向生成树（智能体间有有效通信拓扑）时，由于车辆间的耦合，暂态性能更好 —— 过渡过程中 $\xi_i(t)$ 会趋于 $\xi_j(t)$，$\zeta_i(t)$ 会趋于 $\zeta_j(t)$（智能体间状态更易同步）。
+
+总而言之，定理 5.8 的 “最终收敛到参考状态” 对通信拓扑要求极低（甚至无通信也能实现），但 “过渡过程的平滑性、同步性” 依赖通信拓扑（有向生成树能让暂态更优）。
+
+
+
+**Example 5.10** 
+
+Theorem 5.8 can be illustrated graphically. Consider the inter-action topology shown in Fig. 5.2 where reference model (5.1) is available to all followers. Here we use node $ξ_r$ to denote the team leader. Note that there exists an edge from node $ξ_r$ to all followers on the team. 
+
+<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250920101445481.png" alt="image-20250920101445481" style="zoom:50%;" />
+
+
+
+#### 5.3.2 Leader-following Strategy
+
+在领导者 - 跟随者策略中，$\mathcal{G}_n$ 本身是一棵以车辆 k 为根的有向生成树，且参考模型 (5.1) 仅对车辆 k 可用，也就是说，车辆 k 是车辆 $n + 1$ 的子节点。相应地，在领导者 - 跟随者策略中，$\mathcal{G}_{n+1}$ 也是一棵以车辆 $n + 1$（即唯一的团队领导者）为根的有向生成树，即除车辆 $n + 1$外，每辆车恰好有一个父节点。
+
+所有跟随者（即车辆 1 到 n）的一致性算法设计为：
+$$
+u_i = \dot{\zeta}^r - K_{ri}(\xi_i - \xi^r) - K_{vi}(\zeta_i - \zeta^r), \quad i = k \tag{5.12a}
+$$
+
+$$
+u_i = \dot{\zeta}_{i_\ell} - K_{ri}(\xi_i - \xi_{i_\ell}) - K_{vi}(\zeta_i - \zeta_{i_\ell}), \quad i \neq k \tag{5.12b}
+$$
+
+其中 $K_{ri}$ 和 $K_{vi}$ 是 $m \times m$ 对称正定矩阵，车辆 $i_\ell$ 是车辆 i$(i \neq k$）的父节点。结合算法 (5.12)，式 (4.1) 可写为：
+$$
+\dot{\tilde{\zeta}}_i = -K_{ri}\tilde{\xi}_i - K_{vi}\tilde{\zeta}_i \tag{5.13}
+$$
+定义偏差量：$\tilde{\xi}_k = \xi_k - \xi^r$（车辆 k 与参考状态 $\xi^r$ 的偏差）；当 $i \neq k$ 时，$\tilde{\xi}_i = \xi_i - \xi_{i_\ell}$（车辆 i 与其父节点车辆 $i_\ell$ 状态的偏差）；$\tilde{\zeta}_k = \zeta_k - \zeta^r$（车辆 k 与参考状态 $\zeta^r$ 的偏差）；当 $i \neq k$ 时，$\tilde{\zeta}_i = \zeta_i - \zeta_{i_\ell}$（车辆 i 与其父节点车辆 $i_\ell$ 状态的偏差）。
+
+式 (5.13) 表明，当 $t \to \infty$ 时，$\tilde{\xi}_i(t) \to 0$ 且 $\tilde{\zeta}_i(t) \to 0$。这是因为 $K_{ri}$ 和 $K_{vi}$ 是对称正定矩阵（正定矩阵的性质保证了偏差动态系统的稳定性，使得偏差会随时间衰减至 0）。
+
+偏差趋近于 0 意味着：
+
+- 对于车辆 k，$\xi_k(t) \to \xi^r(t)$，$\zeta_k(t) \to \zeta^r(t)$（直接向参考状态收敛）；
+- 对于 $i \neq k$ 的车辆，$\xi_i(t) \to \xi_{i_\ell}(t)$，$\zeta_i(t) \to \zeta_{i_\ell}(t)$（向父节点状态收敛）。
+
+**Remark 5.11**
+
+要注意，在领导者 - 跟随者策略中，交互拓扑本身是一棵有向生成树，信息仅从父节点流向子节点。当子节点受到干扰时，父节点不会察觉到该干扰，自身运动也不受影响。直觉上，引入从子节点到父节点的信息流来提供反馈，可提高群体的鲁棒性。然而，目前还不清楚如何在不影响稳定性的前提下，将子节点的信息整合到父节点的算法中。
+
+**Example 5.12**
+
+Algorithm (5.12) can be illustrated by the following example. Consider the directed spanning tree shown by Fig. 5.3, where vehicle j is the parent of vehicle j + 1, j = 2, 4, 5, and vehicle 1 is the parent of vehicles 2 and \4. Note that there exists an edge from node ξr to vehicle 1. 
+
+<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250920105418511.png" alt="image-20250920105418511" style="zoom:50%;" />
+
+#### 5.3.3 General Case
+
+在图 $\mathcal{G}_n$任意且参考模型 (5.1) 可能对一个或多个跟随者可用的一般情况下，我们提出一致性算法：
+$$
+\begin{aligned}
+u_i &= \frac{1}{\kappa_i} \sum_{j=1}^n a_{ij}\left[\dot{\zeta}_j - K_{ri}(\xi_i - \xi_j) - K_{vi}(\zeta_i - \zeta_j)\right] \\
+&+ \frac{1}{\kappa_i} a_{i(n+1)}\left[\dot{\zeta}^r - K_{ri}(\xi_i - \xi^r) - K_{vi}(\zeta_i - \zeta^r)\right],
+\end{aligned} \tag{5.14}
+$$
+其中 $a_{ij}$ 是与 $\mathcal{G}_{n+1}$相关的邻接矩阵 $\mathcal{A}_{n+1} \in \mathbb{R}^{n \times n}$ 的 $(i,j)$ 元素，$\kappa_i \triangleq \sum_{j=1}^{n+1} a_{ij}$，且 $K_{ri}$ 和 $K_{vi}$ 是 $m \times m$ 对称正定矩阵。注意，在 (5.14) 中，每辆车都需要其邻居的信息状态及其一、二阶导数$^2$。在实际实现中，邻居信息状态的二阶导数可通过数值微分计算。
+
+We have the following theorem for consensus with a reference model:
+
+**Theorem 5.13**
+
+使用一致性算法（5.14）时，存在唯一的 $u_i$ 解，并且当且仅当有向图 $\mathcal{G}_{n+1}$ 具有以车辆 $n + 1$为根的有向生成树时，当 $t \to \infty$，有 $\xi_i(t) \to \xi^r(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$。
+
+
+
+**Remark 5.14**
+
+需要注意的是，在定理 5.13 的证明中，只要 $f(\cdot, \cdot, \cdot)$ 关于 t 是分段连续的，且关于 $\xi^r$ 和 $\zeta^r$ 是局部李普希茨的，那么对式 (5.1) 中的 $f(t, \xi^r, \zeta^r)$ 没有施加任何约束。
+
+局部李普希茨条件意味着，在定义域内的每一个局部区域（每个点的邻域），函数的 “变化速率” 不会 “过快”—— 函数图像在**局部**不会出现 “无限陡峭” 或者 “剧烈震荡” 到无法用线性关系约束增量的情况。
+
+**Example 5.15**
+
+下面的例子对定理 5.13 进行说明。考虑Fig 5.4 所示的交互拓扑，其中参考模型 (5.1) 仅对车辆 1 和车辆 5 可用。要注意的是，尽管车辆 1 和车辆 5 都没有到团队中所有其他跟随者的有向路径，但存在从节点$\xi^r$到团队中所有跟随者的有向路径。另外还要注意，与领导者 - 跟随者策略（其交互拓扑被限制为有向生成树）不同，算法 (5.14) 允许信息在跟随者之间任意流动。
+
+<img src="Distributed Consensus in Multi-vehicle Cooperative Control- Theory and Applications.assets/image-20250920113441971.png" alt="image-20250920113441971" style="zoom:50%;" />
+
+要注意的是，式 (5.14) 没有明确考虑有界的控制努力。接下来，我们提出一种具有有界控制输入的一致性算法：
+$$
+\begin{aligned}
+u_i &= \frac{1}{\kappa_i}\left(\sum_{j=1}^n a_{ij}\dot{\zeta}_j + a_{i(n+1)}\dot{\zeta}^r\right) \\
+&- \frac{1}{\kappa_i} K_{ri} \tanh\left[\sum_{j=1}^n a_{ij}(\xi_i - \xi_j) + a_{i(n+1)}(\xi_i - \xi^r)\right] \\
+&- \frac{1}{\kappa_i} K_{vi} \tanh\left[\sum_{j=1}^n a_{ij}(\zeta_i - \zeta_j) + a_{i(n+1)}(\zeta_i - \zeta^r)\right], \quad i = 1, \dots, n, \ (5.16)
+\end{aligned}
+$$
+其中 $a_{ij}$ 和 $\kappa_i$ 如式 (5.14) 中所定义，$K_{ri}$ 和 $K_{vi}$是 $m \times m$ 正定对角矩阵，且 $\tanh(\cdot)$ 是按分量定义的。需要注意的是，与式 (5.14) 类似，每辆车都需要从其邻居那里获取信息状态及其一、二阶导数（即信息控制输入 $u_j$）。
+
+
+
+**Theorem 5.16.**
+
+​		假设式 (5.1) 中的 $f(t, \xi^r, \zeta^r)$ 是有界的。采用式 (5.16) 时，存在唯一的有界 $u_i$ 解，并且当且仅当有向图 $\mathcal{G}_{n+1}$ 存在有向生成树时，当 $t \to \infty$，有 $\xi_i(t) \to \xi^r(t)$ 且 $\zeta_i(t) \to \zeta^r(t)$。
+
+
+
+**Remark 5.17**
+
+​		要注意，对于完全访问策略 (5.10)，参考模型必须对所有跟随者可用。相比之下，一致性算法 (5.14) 和 (5.16) 不施加这一约束，允许参考模型对一个或多个跟随者可用。另外还要注意，对于Leader - follower策略 (5.12)，除了唯一的团队领导者外，每辆车恰好有一个父节点（即不允许存在信息环路）。相反，一致性算法 (5.14) 和 (5.16) 允许信息在任何跟随者之间流动，同时只要满足定理 5.13 和 5.16 中的最小连通性要求，就能保证稳定性不变。因此，可通过相邻车辆之间的一般信息交换和耦合引入信息反馈，这增加了冗余度以及对交互链路故障的鲁棒性。完全访问策略 (5.10) 可被视为 (5.14) 的一种特殊情况，此时参考模型对所有跟随者可用。领导者 - 跟随者策略 (5.12) 也可被视为 (5.14) 的一种特殊情况，此时参考模型仅对一个跟随者可用，且每个跟随者恰好有一个父节点。
+
+# 6.Consensus Algorithms for Rigid Body Attitude Dynamics
+刚体姿态动力学的一致性算法
+
+## 6.1 Problem Statement
+
+The main purpose of this chapter is to extend the consensus algorithms for single- or double-integrator dynamics in Chapters 2–5 to rigid body attitude dynamics. We use the term attitude consensus or attitude alignment to refer to the case where multiple rigid bodies maintain the same attitude
+
+- **姿态表示**：采用**欧拉参数（单位四元数）** 描述刚体姿态，记第i个刚体的单位四元数为$q_i = [\hat{q}_i^T, \bar{q}_i]^T \in \mathbb{R}^4$，其中$\hat{q}_i \in \mathbb{R}^3$为向量部分，$\bar{q}_i \in \mathbb{R}$为标量部分，满足$\|\hat{q}_i\|^2 + \bar{q}_i^2 = 1$。
+
+- 动力学模型
+
+  刚体姿态动力学方程（基于欧拉参数）为：
+
+  1. 姿态运动学：$\dot{\hat{q}}_i = -\frac{1}{2}\omega_i \times \hat{q}_i + \frac{1}{2}\bar{q}_i \omega_i$，$\dot{\bar{q}}_i = -\frac{1}{2}\omega_i \cdot \hat{q}_i$；
+
+  2. 角速度动力学：$J_i \dot{\omega}_i = -\omega_i \times (J_i \omega_i) + \tau_i$；
+
+     其中$\omega_i \in \mathbb{R}^3$为角速度，$J_i \in \mathbb{R}^{3×3}$为转动惯量矩阵，$\tau_i \in \mathbb{R}^3$为控制力矩。
+
+- **一致性目标**：多刚体达成姿态一致性（姿态对齐），需满足：对所有$i,j=1,...,n$，$\|q_i(t) - q_j(t)\| \to 0$且$\|\omega_i(t) - \omega_j(t)\| \to 0$$(t \to \infty)$。
+
+采用无向、时不变图描述多刚体间的信息交互：
+
+- 用$G_n^A = (V_n, E_n^A)$和$G_n^B = (V_n, E_n^B)$分别表示姿态$q_i$和角速度$\omega_i$的交互拓扑；
+- $A_n = [a_{ij}] \in \mathbb{R}^{n×n}$和$B_n = [b_{ij}] \in \mathbb{R}^{n×n}$为对应的邻接矩阵（$a_{ij}>0$表示刚体i能接收刚体j的姿态信息，$b_{ij}>0$同理对应角速度信息）；
+- $L_n^A$和$L_n^B$为对应的拉普拉斯矩阵（对称，对角线元素为行和的相反数）。
+
+
+
+## 6.2 Attitude Consensus with Zero Final Angular Velocities
+
+在本节中，考虑多个刚体在运动过程中调整姿态以对齐，且它们的角速度趋近于零的情况。
+
+第$i$个刚体的控制力矩为
+$$
+\tau_i = -k_G \widehat{q^{r*} q_i} - D_{Gi}\omega_i - \sum_{j = 1}^{n}\left[a_{ij}\widehat{q_j^* q_i} + b_{ij}(\omega_i - \omega_j)\right], \quad i = 1,\dots,n \tag{6.1}
+$$
+其中：
+
+- $k_G$是一个非负标量；
+- $D_{Gi} \in \mathbb{R}^{3\times3}$是对称正定矩阵；
+- $q^r \in \mathbb{R}^4$表示每个刚体的恒定参考姿态；
+- $a_{ij}$和$b_{ij}$分别是邻接矩阵$\mathcal{A}_n \in \mathbb{R}^{n\times n}$和$\mathcal{B}_n \in \mathbb{R}^{n\times n}$的$(i,j)$项，这两个邻接矩阵分别与图$\mathcal{G}_n^A$和$\mathcal{G}_n^B$相关联。
+
+​		四元数是一种用于描述刚体姿态的数学工具，形式为$q = [\hat{q}^T, \bar{q}]^T$，其中$\hat{q} \in \mathbb{R}^3$是向量部分，$\bar{q} \in \mathbb{R}$是标量部分。四元数的共轭$q^*$定义为$q^* = [-\hat{q}^T, \bar{q}]^T$。四元数与其共轭的乘积为**单位四元数的模的平方**，即 $q^* q = \|\hat{q}\|^2 + \bar{q}^2$。
+
+- 参考姿态跟踪项：$\color{yellow}-k_G\widehat{q^{r*} q_i}$
+
+  为了使刚体的姿态向参考姿态$q^r$靠拢，需要一个与参考姿态偏差相关的控制项。前面提到$q^{r*} q_i$ 可以量化刚体$i$当前姿态与参考姿态之间的偏差，而$\widehat{q^{r*} q_i}$提取了这个偏差四元数的向量部分，用于表示姿态偏差的方向和程度。系数$k_G$是一个非负标量，起到调节控制强度的作用，$k_G$越大，刚体向参考姿态调整的力度就越强。
+
+- 角速度阻尼项：$\color{yellow}-D_{Gi}\omega_i$
+
+  在刚体运动过程中，为了使角速度能够逐渐减小并趋近于零，需要引入一个阻尼项。$D_{Gi}$是一个$3\times3$的对称正定矩阵，$\omega_i$是刚体i的角速度向量。根据阻尼的原理，该项产生一个与角速度方向相反的力矩，其大小与角速度的大小成正比。
+
+- 刚体间信息交互项：$\color{yellow}- \sum_{j = 1}^{n}\left[a_{ij}\widehat{q_j^* q_i} + b_{ij}(\omega_i - \omega_j)\right]$
+
+  - **姿态交互部分$a_{ij}\widehat{q_j^* q_i}$**：在多刚体系统中，刚体之间需要通过信息交互来实现姿态的一致性。$a_{ij}$是邻接矩阵$\mathcal{A}_n$的元素。$\widehat{q_j^* q_i}$提取了刚体j和刚体i姿态偏差四元数的向量部分，通过对所有相邻刚体的姿态偏差进行求和，使得刚体i能够根据周围刚体的姿态信息调整自身姿态，朝着与相邻刚体姿态一致的方向运动。
+  - **角速度交互部分$b_{ij}(\omega_i - \omega_j)$**：$b_{ij}$是邻接矩阵$\mathcal{B}_n$的元素，描述刚体i和刚体j之间关于角速度信息的交互关系 。$(\omega_i - \omega_j)$表示刚体i与刚体j的角速度差，通过对相邻刚体角速度差的求和，使得刚体i能够根据周围刚体的角速度信息，调整自身的角速度，最终实现多个刚体的角速度趋于一致并趋近于零。
+
+**Theorem 6.2**
+
+控制扭矩：定理假设系统的控制扭矩由特定的公式（6.1）给出，并且图$G^n_B$是无向图。
+
+收敛条件：
+
+- 如果$k_G > 2\sum_{j=1}^n a_{ij}$，且姿态交互图$\mathcal{G}_n^A$和角速度交互图$\mathcal{G}_n^B$是**无向图**（信息交互是 “双向” 的，刚体i与j能互相传递姿态 / 角速度信息),当时间$t \to \infty$时，**所有刚体的姿态收敛到参考姿态**（$q_i(t) \to q^r$），且**角速度收敛到 0**（$\omega_i(t) \to 0$）。
+- 如果参考姿态跟踪增益$k_G = 0$（无全局参考姿态，仅依赖刚体间的局部交互），姿态交互图$\mathcal{G}_n^A$是**树型图**（无冗余边，信息能通过 “树” 结构唯一传递，保证刚体间姿态信息的全局可达性）。当时间$t \to \infty$时，**所有刚体的姿态相互收敛**（$q_i(t) \to q_j(t)$，任意$i,j$），且**角速度收敛到 0**（$\omega_i(t) \to 0$）。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Others
+
+
+
+**Lemma C.2**
+
+若给定矩阵$A \in \mathbb{R}^{n \times n}$、复数$\lambda \in \mathbb{C}$，且存在向量x和y满足：
+
+1. $Ax = \lambda x$，x是A对应特征值$\lambda$的**右特征向量**）；
+2. $A^T y = \lambda y$（y是$A^T$对应特征值$\lambda$的**左特征向量**，即$y^T A = \lambda y^T$）；
+3. $x^T y = 1$（右、左特征向量 “规范正交”）；
+
+同时满足：
+
+- $|\lambda| = \rho(A) > 0$（$\rho(A)$是A的**谱半径**，即A所有特征值的模长的最大值，且$\lambda$的模长等于谱半径）；
+- $\lambda$是A中**唯一模长等于谱半径**的特征值；
+
+则当$m \to \infty$时，矩阵幂$(\lambda^{-1} A)^m$会渐近收敛到外积矩阵$xy^T$，即： $\lim_{m \to \infty} \left( \lambda^{-1} A \right)^m \to xy^T$
+
+
+
+**Theorem C.4.**
+
+若矩阵$A \in \mathbb{R}^{n \times n}$是**非负矩阵**（即所有元素$A_{ij} \geq 0$），则：
+
+- $\rho(A)$（A的**谱半径**，即矩阵所有特征值的模长的最大值）是A的一个特征值；
+- 且存在一个**非负向量$x \geq 0$（x不为零向量），使得$Ax = \rho(A)x$（即x是A对应谱半径$\rho(A)$的特征向量）。
