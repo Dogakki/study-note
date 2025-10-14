@@ -1764,6 +1764,81 @@ $$
 
 
 
+## 6.3 Attitude Consensus Without Absolute and Relative Angular Velocity Measurements
+
+We propose a control torque without absolute and relative angular velocity measurements based on a passivity approach as
+$$
+\dot{\hat{x}}_i = F\hat{x}_i + \sum_{j = 1}^n a_{ij}(q_i - q_j) + \kappa q_i\tag{6.14a}
+\\
+$$
+
+$$
+y_i = PF\hat{x}_i + P\sum_{j = 1}^n a_{ij}(q_i - q_j) + \kappa P q_i \tag{6.14b}
+$$
+
+$$
+\tau_i = -k_G \widehat{q^{r*}} q_i - \sum_{j = 1}^n a_{ij} \widehat{q_j} q_i - \widehat{q_i} y_i, \ i = 1,\dots,n \tag{6.14c}
+$$
+
+​		这组公式通过 “辅助状态演化→中间信号生成→控制力矩构造” 的流程，让多个刚体在**不测量角速度**的前提下，既 “跟着参考姿态走”，又 “和相邻刚体相互牵引”，最终实现姿态一致。
+
+
+
+**Theorem 6.4**
+
+​		假设图$\mathcal{G}_n$是无向的。在式(6.14)的作用下，当$t \to \infty$时，若$k_G > 2\sum_{j = 1}^n a_{ij}$，则$q_i(t) \to q^r$且$\omega_i(t) \to 0$。
+
+证明：
+
+我们先引入Lyapunov function candidate（李雅普诺夫候选函数）这个概念，它是在**李雅普诺夫稳定性理论**中，为分析系统稳定性而构造的 “候选” 能量函数。
+
+构造李雅普诺夫候选函数：
+$$
+V = k_G \sum_{i=1}^n \| q^{r*} q_i - \mathbf{q}_I \|^2 + \frac{1}{2} \sum_{i=1}^n \sum_{j=1}^n a_{ij} \| q^{r*} q_i - q^{r*} q_j \|^2 + \frac{1}{2} \sum_{i=1}^n (\omega_i^T J_i \omega_i) + \dot{\hat{x}}^T (M \otimes I_4)^{-1} (I_n \otimes P) \dot{\hat{x}}
+$$
+
+1. $\color{yellow}{k_G \sum_{i=1}^n \| q^{r*} q_i - \mathbf{q}_I \|^2}$
+
+- 背景：多刚体姿态控制的核心目标之一是 “让每个刚体的姿态趋向参考姿态$q^r$”。
+- 构造逻辑：用**四元数的伴随运算**$q^{r*} q_i$描述 “刚体i的姿态相对于参考姿态$q^r$的变换关系”，再通过范数$\| \cdot \|$衡量 “该变换与理想对齐($\mathbf{q}_I$，如单位四元数$[1,0,0,0]^\top$）的偏差”。对所有刚体求和，并乘以正增益$k_G$，得到 “刚体整体向参考姿态收敛” 的能量项。
+
+2.$\color{yellow}{\frac{1}{2} \sum_{i=1}^n \sum_{j=1}^n a_{ij} \| q^{r*} q_i - q^{r*} q_j \|^2}$
+
+- 背景：多刚体系统需要 “姿态一致性”，即刚体间姿态相互牵引、趋向一致。
+- 构造逻辑：用$a_{ij}$（邻接矩阵元素，描述刚体i与j的通信连接）衡量 “交互权重”，用$\| q^{r*} q_i - q^{r*} q_j \|$衡量 “刚体i与j相对于参考姿态的偏差差”。双重求和覆盖所有刚体对，乘以$\frac{1}{2}$是为了抵消双重求和的重复计算（(i,j\)与\(j,i\)是同一对刚体），最终得到 “刚体间姿态同步” 的能量项。
+
+3.$\color{yellow}{\frac{1}{2} \sum_{i=1}^n (\omega_i^T J_i \omega_i)}$
+
+- 背景：刚体的转动动能是 “旋转活跃程度” 的直接体现，系统稳定时角速度$\omega_i \to 0$，转动动能也应趋向0。
+- 构造逻辑：根据刚体动力学，**转动动能的二次型表示**为$\frac{1}{2} \omega_i^T J_i \omega_i$（$J_i$是转动惯量矩阵）。对所有刚体求和，得到 “整体转动动能” 的能量项。
+
+4.$\color{yellow}{\dot{\hat{x}}^T (M \otimes I_4)^{-1} (I_n \otimes P) \dot{\hat{x}}}$
+
+- 背景：在 “无角速度测量” 的姿态控制中，需构造辅助状态$\hat{x}$间接刻画姿态动态，辅助系统的稳定性是整体控制稳定的关键。
+- 构造逻辑：用**克罗内克积**$\otimes$将 “单刚体辅助系统” 扩展为 “多刚体系统” 的整体辅助状态，再通过正定矩阵P（李雅普诺夫方程的解）和矩阵逆$(M \otimes I_4)^{-1}$，构造辅助状态变化率$\dot{\hat{x}}$的 “正定二次型能量项”，保证辅助系统自身的稳定性。
+
+(证明待补)
+
+## 6.4 Attitude Consensus with Nonzero Final Angular Velocities
+
+在最终非零角速度的情况下达成姿态共识
+
+The proposed control torque on the ith rigid body is
+$$
+\tau_i = \omega_i \times J_i \omega_i - J_i \sum_{j=1}^n \left[ a_{ij} \widehat{q_j^* q_i} + b_{ij} (\omega_i - \omega_j) \right], \quad i = 1, \ldots, n, \tag{6.16}
+$$
+**Theorem 6.5.**
+
+​		假设图$\mathcal{G}_n^A$和$\mathcal{G}_n^B$是**无向图**（无向图意味着多刚体间的通信 / 影响关系是双向的）。采用式(6.16)给出的**控制力矩**（用于驱动多刚体的姿态和角速度变化）。进一步要求$\mathcal{G}_n^A$是**树状结构**，且$\mathcal{G}_n^B$是**连通图**（保证刚体间角速度信息传递的 “整体性”，即任意两个刚体都能通过若干中间刚体建立影响关系）。
+
+当满足上述条件时，随着时间$t \to \infty$，对于所有$i \neq j$（即任意两个不同的刚体），会有：
+
+- $q_i(t) \to q_j(t)$：各刚体的**姿态**趋于一致。
+- $\omega_i(t) \to \omega_j(t)$：各刚体的**角速度**趋于一致。
+
+
+
+## 6.5 Simulation Results
 
 
 
@@ -1780,11 +1855,60 @@ $$
 
 
 
-# Others
 
 
 
-**Lemma C.2**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# B. Graph Theory Notations
+
+定义拉普拉斯矩阵$\mathcal{L}_p$，
+$$
+\mathcal{L}_p = [\ell_{ij}] \in \mathbb{R}^{p \times p}\qquad \ell_{ij} = -a_{ij},i \neq j\tag{B.1}
+$$
+​		对于无向图，$\mathcal{L}_p$是对称的并被称为拉普拉斯矩阵。然而对于有向图，$\mathcal{L}_p$不需要是对称的，被称为非对称拉普拉斯矩阵或者有向拉普拉斯矩阵。
+
+**Remark B.1.**
+
+式 (B.1) 中的 $\mathcal{L}_p$ 可等价地定义为 $\mathcal{L}_p \triangleq D - \mathcal{A}_p$，其中 $D = [d_{ij}] \in \mathbb{R}^{p \times p}$ 是入度矩阵，定义为当 $i \neq j$ 时，$d_{ij} = 0$，且 $d_{ii} = \sum_{j=1}^p a_{ij}$，$i = 1, \ldots, p$。另外注意，对于有向图，式 (B.1) 给出的非对称拉普拉斯矩阵的定义，与图论文献中（例如，[204]）常见的有向图拉普拉斯矩阵的定义不同。不过，由于式 (B.1) 的定义与一致性算法相关，我们对有向图采用式 (B.1) 给出的定义。
+
+
+
+# C.Matrix Theory Notations
+
+## **Theorem C.1.**
+
+**盖尔圆定理（Gershgorin's disc theorem）**
+
+设$A = [a_{ij}] \in \mathbb{R}^{n \times n}$（A是n阶实矩阵），定义$R_i'(A) \equiv \sum_{\substack{j = 1 \\ j \neq i}}^n |a_{ij}|$（$i = 1, \dots, n$），即矩阵A第i行去掉对角线元素后，其余元素的绝对值之和（称为 “删除绝对行和”）。
+
+那么，矩阵A的**所有特征值**都位于n个圆盘的并集内：$\bigcup_{i = 1}^n \left\{ z \in \mathbb{C}: |z - a_{ii}| \leq R_i'(A) \right\} \equiv G(A)$（这里$\mathbb{C}$是复数域，每个圆盘以$a_{ii}$为圆心，$R_i'(A)$为半径）。
+
+**进一步结论**
+
+此外，如果这n个圆盘中，有k个圆盘的并集形成一个**连通区域**，且该区域与剩下的\(n - k\)个圆盘都不相交，那么矩阵A在这个区域内恰好有k个特征值。
+
+## **Lemma C.2**
 
 若给定矩阵$A \in \mathbb{R}^{n \times n}$、复数$\lambda \in \mathbb{C}$，且存在向量x和y满足：
 
@@ -1801,9 +1925,30 @@ $$
 
 
 
-**Theorem C.4.**
+## Lemma C.3
+
+当且仅当$\Gamma(A)$是强连通的，$n\times n$实矩阵A是不可约的。
+
+**强连通：**
+
+​		在一个有向图 $G = (V, E)$ 中（其中 V 是节点集合，E 是有向边的集合），如果对于图中的任意两个节点 u 和 v（$u, v \in V$），都存在从 u 到 v 的路径，同时也存在从 v 到 u 的路径 ，那么这个有向图就是强连通图，称图具有强连通性。
+
+
+
+## **Theorem C.4.**
 
 若矩阵$A \in \mathbb{R}^{n \times n}$是**非负矩阵**（即所有元素$A_{ij} \geq 0$），则：
 
 - $\rho(A)$（A的**谱半径**，即矩阵所有特征值的模长的最大值）是A的一个特征值；
 - 且存在一个**非负向量$x \geq 0$（x不为零向量），使得$Ax = \rho(A)x$（即x是A对应谱半径$\rho(A)$的特征向量）。
+
+
+
+## Theorem C.5. 
+
+针对不可约且非负的$n\times n$实矩阵A，具体结论如下：
+
+- （i）矩阵A的谱半径$\rho(A)$大于0（谱半径是矩阵所有特征值的模的最大值）。
+- （ii）$\rho(A)$是矩阵A的一个特征值。
+- （iii）存在一个正向量x，使得$Ax = \rho(A)x$（即$\rho(A)$对应的特征向量是正向量）。
+- （iv）$\rho(A)$是矩阵A的一个代数单特征值（因而也是几何单特征值，代数重数和几何重数都为1）。
